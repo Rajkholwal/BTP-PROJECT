@@ -1,0 +1,32 @@
+.option-selector-container {
+    text-align: center;
+  }
+  
+  .options {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .option {
+    cursor: pointer;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+  }
+  
+  .option:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .option.selected {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .option.selected:hover {
+    background-color: #388e3c;
+  }
+  
