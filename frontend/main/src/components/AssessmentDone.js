@@ -190,6 +190,12 @@ const AssessmentDone = () => {
                             <button onClick={() => navigate('/')} className="text-sm font-semibold leading-6 text-gray-900">
                                 Attempt another quiz<span aria-hidden="true">→</span>
                             </button>
+                            <button
+                                onClick={() => navigate('/review-assessment', { state: { questions, marks, seconds } })}
+                                className="bg-green-500 text-white font-semibold leading-6 px-4 py-2 rounded transition duration-200 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            >
+                                Review Assessment<span aria-hidden="true">→</span>
+                            </button>
                         </div>
                     </div>
                 </>
