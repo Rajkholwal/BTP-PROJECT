@@ -13,7 +13,6 @@ import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import Logout from "./components/Logout";
 import Firstpage from "./components/Firstpage";
-import ReviewAssessment from './components/ReviewAssessment';
 
 const clientId = '1099148463228-fniq392tv0qv5hlbm084r9m8tp8ph0ls.apps.googleusercontent.com';
 function App() {
@@ -57,11 +56,6 @@ function App() {
         <Route path='/AssessmentDone' index element={
           <>
             <AssessmentDone />
-          </>
-        } />
-           <Route path='/review-assessment' index element={
-          <>
-            <ReviewAssessment />
           </>
         } />
 
