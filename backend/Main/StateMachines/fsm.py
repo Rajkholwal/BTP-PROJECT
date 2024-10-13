@@ -23,6 +23,27 @@ def genearte_question_FSM(level):
 def get_random_filename():
     return f"sequence_img_{random.randint(1, 10000)}"
 
+def Question_text_generator(seq,state,bit):
+    question_text=f"The following state diagram is designed to detect the string '{seq}'. One of the transitions from State '{state}' on receiving bit '{bit}' is missing. Select the correct option that complete the state diagram(Assume start state is S0):-"
+    return question_text
+
+def generate_distractors(states, correct_next_state):
+    # Start by adding the correct answer
+    possible_answers = [correct_next_state]
+    
+    # Add unique distractors while avoiding the correct answer
+    while len(possible_answers) < min(len(states) + 1, 4):  # Ensures no more than available states + 1 (correct answer)
+        random_distractor = random.choice(states)
+        
+        # Add the distractor if it's not already in the possible_answers
+        if random_distractor not in possible_answers:
+            possible_answers.append(random_distractor)
+    
+    # Shuffle the possible answers so the correct one isn't always in the same position
+    random.shuffle(possible_answers)
+    
+    return possible_answers
+
 def Nonoverlapping_MealyFSM(image_dir="StateMachines/images"):
     # Define a list of sequences and choose one randomly
     sequences = ["101", "1010", "1101", "011", "0101", "010", "1001", "0110"]
@@ -57,7 +78,7 @@ def Nonoverlapping_MealyFSM(image_dir="StateMachines/images"):
         return None  # If no transition could be removed
 
     # Generate the question text
-    question_text = f"In the state diagram below, complete the missing transition for the sequence '{sequence}' (Assume start is S0): {state} --({symbol})--> ?"
+    question_text = Question_text_generator(sequence,state,symbol)
 
     # Define the correct answer
     next_state, output = removed_transition
@@ -79,14 +100,7 @@ def Nonoverlapping_MealyFSM(image_dir="StateMachines/images"):
     os.makedirs(image_dir, exist_ok=True)
     graph_svg = print_mealyfsm_graphviz(states, transitions, image_dir, get_random_filename())
 
-    # return {
-    #     "question": question_text,
-    #     "correct_answer": correct_answer,
-    #     "options": possible_answers,
-    #     "correct_answer_index": correct_answer_index,
-    #     "fsm_diagram": graph_svg
-    # }
-    
+    # labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
     return (question_text, possible_answers, correct_answer, [graph_svg])
 
 def find_fallback_state(sequence, index, symbol, states):
@@ -157,8 +171,7 @@ def Overlapping_MealyFSM(image_dir="StateMachines/images"):
         return None  # If no transition could be removed
 
     # Generate the question text
-    question_text = f"In the state diagram below, complete the missing transition for the sequence '{sequence}' (Assume start is S0): {state} --({symbol})--> ?"
-
+    question_text = Question_text_generator(sequence,state,symbol)
     # Define the correct answer
     next_state, output = removed_transition
     correct_answer = f"{next_state} / {output}"
@@ -179,14 +192,8 @@ def Overlapping_MealyFSM(image_dir="StateMachines/images"):
     os.makedirs(image_dir, exist_ok=True)
     graph_svg = print_mealyfsm_graphviz(states, transitions, image_dir, get_random_filename())
 
-    # return {
-    #     "question": question_text,
-    #     "correct_answer": correct_answer,
-    #     "options": possible_answers,
-    #     "correct_answer_index": correct_answer_index,
-    #     "fsm_diagram": graph_svg
-    # }
-    
+
+    # labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
     return (question_text, possible_answers, correct_answer, [graph_svg])
 def Nonoverlapping_MooreFSM(image_dir="StateMachines/images"):
     sequences = ["101", "1010", "1101", "011", "0101", "010", "1001", "0110"]
@@ -206,17 +213,9 @@ def Nonoverlapping_MooreFSM(image_dir="StateMachines/images"):
     state, symbol, correct_next_state = missing_transition
 
     # Create the question text
-    question_text = f"In the state diagram below, complete the missing transition for the sequence {sequence} (Assume start is S0): {state} --({symbol})--> ?"
-
+    question_text = Question_text_generator(sequence,state,symbol)
     # Generate multiple-choice options
-    possible_answers = [
-        correct_next_state,  # Correct answer
-        states[0],           # Distractor
-        states[-1],          # Another distractor
-        random.choice(states[:-1])  # Random distractor
-    ]
-
-    random.shuffle(possible_answers)
+    possible_answers=generate_distractors(states,correct_next_state)
     correct_answer_index = possible_answers.index(correct_next_state)
     correct_answer= possible_answers[correct_answer_index]
     # Return the question data
@@ -226,7 +225,8 @@ def Nonoverlapping_MooreFSM(image_dir="StateMachines/images"):
     #     "options": possible_answers,
     #     "correct_answer": correct_answer
     # }
-    return question_text, possible_answers, correct_answer, [fsm_graph_svg]
+    labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
+    return question_text, labeled_options, correct_answer, [fsm_graph_svg]
 def N_O_build_fsm(sequence):
     n = len(sequence)
     states = [f'S{i}' for i in range(n+1)]
@@ -314,16 +314,9 @@ def Overlapping_MooreFSM(image_dir="StateMachines/images"):
     state, symbol, correct_next_state = missing_transition
 
     # Create the question text
-    question_text = f"In the state diagram below, complete the missing transition for the sequence {sequence} (Assume start is S0): {state} --({symbol})--> ?"
-
+    question_text = Question_text_generator(sequence,state,symbol)
     # Generate multiple-choice options
-    possible_answers = [
-        correct_next_state,  # Correct answer
-        states[0],           # Distractor
-        states[-1],          # Another distractor
-        random.choice(states[:-1])  # Random distractor
-    ]
-
+    possible_answers=generate_distractors(states,correct_next_state)
     random.shuffle(possible_answers)
     correct_answer_index = possible_answers.index(correct_next_state)
     correct_answer= possible_answers[correct_answer_index]
@@ -334,7 +327,8 @@ def Overlapping_MooreFSM(image_dir="StateMachines/images"):
     #     "options": possible_answers,
     #     "correct_answer": correct_answer
     # }
-    return question_text, possible_answers, correct_answer, [fsm_graph_svg]
+    labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
+    return question_text, labeled_options, correct_answer, [fsm_graph_svg]
 
 def ask_for_completion(transitions, states):
     missing_transition = remove_random_transition(transitions, states)
@@ -343,9 +337,85 @@ def ask_for_completion(transitions, states):
         return (state, symbol, correct_next_state)
     return None
 
-# def main():
-#     for _ in range(10):
-#         print(genearte_question_FSM('easy'))
+def generate_state_table_NONOVER(a):
+    n = len(a)  # Length of the input pattern
+    statetable = {}
+    c=''
+    d=''
+    # Initialize the states S0, S1, ..., S_n
+    for i in range(n + 1):
+        statetable[f'S{i}'] = {str(bit): f'S{i}' for bit in range(2)}
+        statetable[f'S{i}']['output'] = '0'
 
-# if __name__ == "__main__":
-#     main()
+    # Fill in the transitions based on the input sequence 'a'
+    for i in range(n):
+        current_state = f'S{i}'
+        next_state = f'S{i+1}'
+        if i > 0:
+            Opp_char=str(1-int(a[i]))
+            d=c+Opp_char
+            e=is_left_substring_match_from_start(d,a)
+            statetable[current_state][Opp_char]=f'S{e}'
+
+        
+        c=c+a[i]
+        statetable[current_state][a[i]] = next_state
+
+    statetable[f'S{n}']['0']=f'S{0}'
+    statetable[f'S{n}']['1']=f'S{0}'
+    
+    statetable[f'S{n}']['output'] = '1'
+    #print(c)
+    return statetable
+
+def generate_state_table_OVER(a):
+    n = len(a)  # Length of the input pattern
+    statetable = {}
+    c=''
+    d=''
+    # Initialize the states S0, S1, ..., S_n
+    for i in range(n + 1):
+        statetable[f'S{i}'] = {str(bit): f'S{i}' for bit in range(2)}
+        statetable[f'S{i}']['output'] = '0'
+
+    # Fill in the transitions based on the input sequence 'a'
+    for i in range(n):
+        current_state = f'S{i}'
+        next_state = f'S{i+1}'
+        if i > 0:
+            Opp_char=str(1-int(a[i]))
+            d=c+Opp_char
+            e=is_left_substring_match_from_start(d,a)
+            statetable[current_state][Opp_char]=f'S{e}'
+
+        
+        c=c+a[i]
+        statetable[current_state][a[i]] = next_state   
+        
+    
+    d=c[1:]+'0'
+    e=is_left_substring_match_from_start(d,a)
+    statetable[f'S{n}']['0']=f'S{e}'
+    d=c[1:]+'1'
+    e=is_left_substring_match_from_start(d,a)
+    statetable[f'S{n}']['1']=f'S{e}'
+    
+
+
+
+    statetable[f'S{n}']['output'] = '1'
+    #print(c)
+    return statetable
+
+def is_left_substring_match_from_start(str1, str2):
+    # Iterate through `str1`, generating substrings by removing characters from the left side
+    for i in range(len(str1)):
+        # Current substring of `str1` generated by removing left characters
+        current_substring = str1[i:]
+        
+        # Check if `str2` starts with the current substring
+        if str2.startswith(current_substring):
+            return len(current_substring)
+            
+    return 0
+
