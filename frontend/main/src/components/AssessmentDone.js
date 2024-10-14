@@ -11,7 +11,7 @@ const AssessmentDone = () => {
     const marksScored = marks[0];
     const totalMarks = marks[1];
     const seconds = marks[2];
-    const percentage = (marksScored / totalMarks) * 100;
+   const percentage = ((marksScored / totalMarks) * 100).toFixed(2);
 
     const generatePDF = () => {
         const pdf = new jsPDF();
