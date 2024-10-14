@@ -8,6 +8,34 @@ import time
 from cairosvg import svg2png
 from io import BytesIO
 
+
+########################## Utilities ##############################################################
+
+# Function to flip bits for options 
+def flip_bits(correct_missing_values, num_flips=1):
+    incorrect_option = correct_missing_values.copy()
+    indices_to_flip = random.sample(range(len(incorrect_option)), num_flips)
+    
+    for index in indices_to_flip:
+        incorrect_option[index] = 1 - incorrect_option[index]  # Flip 0 to 1 or 1 to 0
+    
+    return incorrect_option
+
+# Function to generate the four options for the missing entries
+def generate_options(correct_missing_values):
+    options = [correct_missing_values]
+    
+    # Generate three incorrect options
+    while len(options) < 4:
+        num_flips = random.randint(1, len(correct_missing_values))  # Randomly decide how many bits to flip
+        incorrect_option = flip_bits(correct_missing_values, num_flips)
+        
+        if incorrect_option != correct_missing_values and incorrect_option not in options:
+            options.append(incorrect_option)
+
+    random.shuffle(options)  # Shuffle options so the correct one isn't always first
+    return options
+
 # Possible operators for generating random expressions
 operators = ['and', 'or', 'not']
 
@@ -74,18 +102,7 @@ def convert_svg_to_png(svg_content):
     png_io.seek(0)  # Reset the pointer to the beginning of the BytesIO object
     return png_io
 
-# Function to generate the four options for the missing entries
-def generate_options(correct_missing_values):
-    options = [correct_missing_values]
-
-    # Generate three incorrect options
-    while len(options) < 4:
-        incorrect_option = [random.choice([0, 1]) for _ in range(len(correct_missing_values))]
-        if incorrect_option != correct_missing_values and incorrect_option not in options:
-            options.append(incorrect_option)
-
-    random.shuffle(options)  # Shuffle options so the correct one isn't always first
-    return options
+##################################### Question template ##################################################
 
 def generate_question_missing_values():
     num_vars = random.choice([2, 3])
