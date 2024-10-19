@@ -7,11 +7,13 @@ import UpperNav from './UpperNav';
 const AssessmentDone = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const { questions, marks, loggedInName, loggedInEmail } = useLocation().state;
+    const { questions, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion } = useLocation().state;
     const marksScored = marks[0];
     const totalMarks = marks[1];
     const seconds = marks[2];
-   const percentage = ((marksScored / totalMarks) * 100).toFixed(2);
+    const percentage1 = (marksScored / totalMarks) * 100;
+    const percentage = percentage1.toFixed(2);
+
 
     const generatePDF = () => {
         const pdf = new jsPDF();
@@ -44,7 +46,7 @@ const AssessmentDone = () => {
                 img.src = url;
             });
         };
-
+        
         const processSvg = async (svgData) => {
             let svgString, width, height;
 
@@ -147,7 +149,7 @@ const AssessmentDone = () => {
 
         generatePdfContent();
     };
-
+    console.log("times",timeSpentPerQuestion);
     useEffect(() => {
         setTimeout(() => {
             setLoading(false);
@@ -190,6 +192,13 @@ const AssessmentDone = () => {
                             <button onClick={() => navigate('/')} className="text-sm font-semibold leading-6 text-gray-900">
                                 Attempt another quiz<span aria-hidden="true">→</span>
                             </button>
+                            <button
+                                onClick={() => navigate('/review-assessment', { state: { questions, marks, seconds,selectedOptions, timeSpentPerQuestion } })}
+                                className="bg-green-500 text-white font-semibold leading-6 px-4 py-2 rounded transition duration-200 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            >
+                                Review Assessment<span aria-hidden="true">→</span>
+                            </button>
+
                         </div>
                     </div>
                 </>
