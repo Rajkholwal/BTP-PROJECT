@@ -22,7 +22,6 @@ const AssessmentPage = () => {
   const sliderRef = useRef(null);
   const [isHovering1, setIsHovering1] = useState(false);
   let timerIntervalId;
-
   useEffect(() => {
     const fetchQuestionData = async () => {
       if (localStorage.getItem("questionsFetched")) {
@@ -123,12 +122,20 @@ const AssessmentPage = () => {
     };
 
     questionsData.forEach((question, index) => {
+      // if (question.answer[0][0] === 'A') {
+      //   completeFeedback.correctOptions[index.toString()] = "0";
+      // } else if (question.answer[0][0] === 'B') {
+      //   completeFeedback.correctOptions[index.toString()] = "1";
+      // } else if (question.answer[0][0] === 'C') {
+      //   completeFeedback.correctOptions[index.toString()] = "2";
+      // } else {
+      //   completeFeedback.correctOptions[index.toString()] = "3";
+      // }
       for(let i=0; i<question.options.length; i++){
         if (question.options[i] === question.answer)
           completeFeedback.correctOptions[index] = i;
       }
     });
-
 
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_assessment`, {
@@ -143,7 +150,7 @@ const AssessmentPage = () => {
       const totalMarks = data.total_marks;
       const marks = [marksScored, totalMarks, formatTime(overallTimer)];
       localStorage.clear();
-      navigate('/AssessmentDone', { state: { questions: questionsData, marks, loggedInName, loggedInEmail } });
+      navigate('/AssessmentDone', { state: { questions: questionsData, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion } });
     } catch (error) {
       console.error(error);
     }
