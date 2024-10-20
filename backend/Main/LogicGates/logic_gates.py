@@ -5,8 +5,42 @@ import schemdraw
 import schemdraw.logic as logic
 from schemdraw.parsing import logicparse
 
+################################## UTILITIES ##############################################################
 
+def replace_operators(expr):
+    """Replace logical operators with symbols for better readability."""
+    return expr.replace("not", "!").replace(" and", "&").replace(" or", "|").replace("NOT", "!").replace(" AND", "&").replace(" OR", "|")
+
+def get_svg_from_file(filepath):
+    """Read the SVG content from a file."""
+    with open(filepath, "r") as f:
+        return f.read()
+############################## FOR THE AVOID DUPLICATE QUESTION ##############################
+def generate_question(level):
+    """Randomly generate a question of either type, ensuring no duplicates."""
+    global previous_questions
+
+    for _ in range(10):  # Try a few times to avoid duplicates
+        if random.choice([True, False]):
+            question_data = generate_equivalent_circuit_question()
+        else:
+            question, options, correct_answer, svg_path = generate_simple_gate_operation_question()
+            question_data = (question, options, correct_answer, [get_svg_from_file(svg_path)])
+        
+        question_text = question_data[0]
+        
+        # If the question hasn't been asked before, return it
+        if question_text not in previous_questions:
+            previous_questions.add(question_text)
+            return question_data
+
+    # If all attempts produced duplicates, force generate a new question
+    return generate_question(level)
+
+# Define possible gates (excluding XOR, NAND, and NOR)
 gates = ['and', 'or', 'not']
+
+previous_questions = set()  # Set to track previously generated questions
 
 def random_expression(variables, num_gates):
     """Generate a random logic expression with a given number of gates and variables."""
@@ -29,7 +63,7 @@ def eval_expr(expr, values):
     for var, val in values.items():
         expr = expr.replace(var, str(val))
     return eval(expr)
-
+###################### Algo for the equivalent circuit identification #######################
 def generate_truth_table(expr, variables):
     """Generate a truth table for the given expression using itertools."""
     truth_table = []
@@ -67,6 +101,8 @@ def compare_truth_tables(table1, table2):
 
     return True  # All outputs match, so the expressions are equivalent
 
+####################### INPUT OUTPUT ALGO ###############################
+
 def generate_simple_gate_operation_question():
     """Generate a question involving a simple gate operation and save the gate image."""
     gates = ['AND', 'OR', 'NOT']
@@ -103,6 +139,10 @@ def generate_simple_gate_operation_question():
     options = ['0', '1']
     correct_answer = str(output)
     random.shuffle(options)
+    
+    
+    ########################################### Question Templates ##########################
+    
     question = f"What is the output of the {gate_type} gate with inputs {', '.join(map(str, input_values))}?"
     if gate_type == 'NOT':
         question = f"What is the output of the {gate_type} gate with input {input_values[0]}?"
@@ -126,13 +166,6 @@ def generate_equivalent_circuit_question():
     truth_table1 = generate_truth_table(expr1, variables)
     truth_table2 = generate_truth_table(expr2, variables)
 
-    # Print the expressions and their truth tables for verification
-    #print("Expression 1:", replace_operators(expr1))
-    #print("Truth Table 1:", truth_table1)
-    
-    #print("Expression 2:", replace_operators(expr2))
-    #print("Truth Table 2:", truth_table2)
-
     # Check if the outputs are equivalent
     equivalent = compare_truth_tables(truth_table1, truth_table2)
 
@@ -142,19 +175,3 @@ def generate_equivalent_circuit_question():
     
     return (question, options_text, correct_answer, [get_svg_from_file(x) for x in [svg_path1, svg_path2]])
 
-def replace_operators(expr):
-    """Replace logical operators with symbols for better readability."""
-    return expr.replace("not", "!").replace(" and", "&").replace(" or", "|").replace("NOT", "!").replace(" AND", "&").replace(" OR", "|")
-
-def get_svg_from_file(filepath):
-    """Read the SVG content from a file."""
-    with open(filepath, "r") as f:
-        return f.read()
-
-def generate_question(level):
-    """Randomly generate a question of either type."""
-    if random.choice([True, False]):
-        return generate_equivalent_circuit_question()  # Call the function for equivalent questions
-    else:
-        question, options, correct_answer, svg_path = generate_simple_gate_operation_question()
-        return (question, options, correct_answer, [get_svg_from_file(svg_path)])
