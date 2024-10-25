@@ -14,6 +14,7 @@ tags = [
     question_tags("tag-5",["SequenceDetector"]),
     question_tags("tag-6",["Truth-Tables"]),
     question_tags("tag-7", ["State-Machine"]),
+    question_tags("tag-8", ["State-Table"]),
     # Add more questions with different tags
 ]
 def main(selected_tags,num_questions,level):

@@ -138,7 +138,7 @@ def generate_unique_flip(correct_answer, possible_answers):
         if flipped not in possible_answers:
             return flipped
 
-def generate_questions():
+def generate_questions(level):
     sequences = ["101", "1010", "0101", "1101", "010","011","110","0110","1001","1011"]
     sequence = random.choice(sequences)
     strings = ["101101101010", "011011010101", "011011010110", "011010100101", "010101001011", "011010110110", "100110010101", "110110101011","101101101101","110101011101"]

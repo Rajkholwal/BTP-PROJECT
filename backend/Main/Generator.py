@@ -11,6 +11,8 @@ import SequenceDetector.SequenceDetector
 import LogicGates
 import TruthTable
 import StateMachines
+import StateTable.StateTable
+import StateTable
 import io
 import os
 import svg2png
@@ -93,7 +95,7 @@ def generate_question(level,tags):
     tag5 = "SequenceDetector"
     tag6 = "Truth-Tables"
     tag7 = "State-Machine"
-    
+    tag8 = "State-Table"
     print("tags are")
     print(tags)
     for tag in tags:
@@ -112,6 +114,8 @@ def generate_question(level,tags):
             random_list.append(6)
         elif tag == tag7:
             random_list.append(7)
+        elif tag == tag8:
+            random_list.append(8)
 
     flag = random.choice(random_list)
     
@@ -132,3 +136,5 @@ def generate_question(level,tags):
         return TruthTable.generator.generate_question_boolean_algebra()
     elif flag == 7:
         return StateMachines.fsm.genearte_question_FSM(level)
+    elif flag == 8:
+        return StateTable.StateTable.generate_question_ST(level)
