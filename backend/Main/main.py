@@ -11,7 +11,7 @@ tags = [
     question_tags("tag-2", ["Boolean-algebra"]),
     question_tags("tag-3", ["Logic-Gates"]),
     question_tags("tag-4", ["Flip-flops"]),
-    question_tags("tag-5",["Theory"]),
+    question_tags("tag-5",["SequenceDetector"]),
     question_tags("tag-6",["Truth-Tables"]),
     question_tags("tag-7", ["State-Machine"]),
     # Add more questions with different tags

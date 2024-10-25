@@ -7,7 +7,7 @@ import Number_System.numerSystemFinal
 import Boolean_Algebra.booleanAlgebraFinal
 import FlipFlops.flipflops
 import StateMachines.fsm
-import Theory.theory
+import SequenceDetector.SequenceDetector
 import LogicGates
 import TruthTable
 import StateMachines
@@ -90,7 +90,7 @@ def generate_question(level,tags):
     tag2 = "Boolean-algebra"
     tag3 = "Logic-Gates"
     tag4 = "Flip-flops"
-    tag5 = "Theory"
+    tag5 = "SequenceDetector"
     tag6 = "Truth-Tables"
     tag7 = "State-Machine"
     
@@ -127,7 +127,7 @@ def generate_question(level,tags):
     elif flag == 4:
         return FlipFlops.flipflops.generate_question_flipflops(level)
     elif flag == 5:
-        return Theory.theory.generate_question_theory(level)
+        return SequenceDetector.SequenceDetector.generate_questions(level)
     elif flag == 6:
         return TruthTable.generator.generate_question_boolean_algebra()
     elif flag == 7:
