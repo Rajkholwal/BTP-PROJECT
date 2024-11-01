@@ -205,7 +205,10 @@ def over_mealy(sequence):
         fallback_state = find_fallback_state(n, symbol)
         transitions[final_state][symbol] = (fallback_state, '0')
 
-    return states, transitions
+    R_states, R_transitions = reduce_mealy_states(states,transitions)
+    return R_states, R_transitions
+
+
 def nonover_mealy(sequence):
     n = len(sequence)
     states = [f'S{i}' for i in range(n+1)]
@@ -234,9 +237,66 @@ def nonover_mealy(sequence):
     final_state = states[-1]
     for symbol in '01':
         transitions[final_state][symbol] = ("S0", '0')
+    R_states, R_transitions = reduce_mealy_states(states,transitions)
+    return R_states, R_transitions
 
-    return states, transitions
+def reduce_mealy_states(states, transitions):
+    # Start by placing states with identical output behaviors in the same partition
+    initial_partition = {}
+    for state in states:
+        key = tuple((symbol, transitions[state][symbol][1]) for symbol in transitions[state])
+        if key not in initial_partition:
+            initial_partition[key] = set()
+        initial_partition[key].add(state)
+    partitions = list(initial_partition.values())
 
+    # Helper function to locate a partition index for a given state
+    def find_partition(state):
+        for idx, part in enumerate(partitions):
+            if state in part:
+                return idx
+        return -1
+
+    # Refinement loop
+    changed = True
+    while changed:
+        changed = False
+        new_partitions = []
+
+        for part in partitions:
+            subgroup = {}
+            for state in part:
+                # Create a key based on transition targets and outputs to determine if two states can stay in the same group
+                key = (
+                    find_partition(transitions[state]['0'][0]),
+                    find_partition(transitions[state]['1'][0]),
+                    transitions[state]['0'][1],  # Output for input '0'
+                    transitions[state]['1'][1]   # Output for input '1'
+                )
+                if key not in subgroup:
+                    subgroup[key] = set()
+                subgroup[key].add(state)
+
+            new_partitions.extend(subgroup.values())
+
+        if new_partitions != partitions:
+            changed = True
+            partitions = new_partitions
+
+    # Map original states to reduced states
+    state_mapping = {state: f'S{i}' for i, part in enumerate(partitions) for state in part}
+
+    # Build reduced transition table
+    reduced_transitions = {}
+    for part in partitions:
+        rep_state = next(iter(part))  # Representative state for each partition
+        reduced_transitions[state_mapping[rep_state]] = {
+            symbol: (state_mapping[transitions[rep_state][symbol][0]], transitions[rep_state][symbol][1])
+            for symbol in transitions[rep_state]
+        }
+
+    return list(state_mapping.values()), reduced_transitions
+  
 def generate_state_table_mealy_svg(image_dir="StateTable/images"):
     
     sequence = generate_sequence()
@@ -312,7 +372,7 @@ def identify_seq(image_dir="StateTable/images"):
     # Add the table as a single node
     dot.node('table', label=table, shape='plain')
 
-    question_text = ST_Question_text_generator()
+    question_text = Seq_ST_Question_text_generator()
     
     correct_answer=sequence
     options=[correct_answer,generate_sequence(),generate_sequence(),generate_sequence()]
