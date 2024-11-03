@@ -15,6 +15,7 @@ def get_svg_from_file(filepath):
     """Read the SVG content from a file."""
     with open(filepath, "r") as f:
         return f.read()
+
 ############################## FOR THE AVOID DUPLICATE QUESTION ##############################
 def generate_question(level):
     """Randomly generate a question of either type, ensuring no duplicates."""
@@ -63,6 +64,7 @@ def eval_expr(expr, values):
     for var, val in values.items():
         expr = expr.replace(var, str(val))
     return eval(expr)
+
 ###################### Algo for the equivalent circuit identification #######################
 def generate_truth_table(expr, variables):
     """Generate a truth table for the given expression using itertools."""
@@ -140,9 +142,6 @@ def generate_simple_gate_operation_question():
     correct_answer = str(output)
     random.shuffle(options)
     
-    
-    ########################################### Question Templates ##########################
-    
     question = f"What is the output of the {gate_type} gate with inputs {', '.join(map(str, input_values))}?"
     if gate_type == 'NOT':
         question = f"What is the output of the {gate_type} gate with input {input_values[0]}?"
@@ -150,28 +149,35 @@ def generate_simple_gate_operation_question():
     return question, options, correct_answer, svg_path
 
 def generate_equivalent_circuit_question():
-    """Generate a question involving equivalent circuits using truth tables."""
+    """Generate a question involving equivalent circuits using truth tables, ensuring they are not equivalent."""
     variables = [chr(ord('a') + i) for i in range(random.randint(2, 3))]  # Generate 2 to 3 variables
+    
+    # Generate the first random expression
     expr1 = random_expression(variables, random.randint(2, 3))
+    
+    # Generate a second expression that is intended to be different
     expr2 = random_expression(variables, random.randint(2, 3))
-
-    # Create SVG diagrams
+    while expr2 == expr1 or compare_truth_tables(generate_truth_table(expr1, variables), generate_truth_table(expr2, variables)):
+        # Keep generating expr2 until it is different from expr1 and has a different truth table
+        expr2 = random_expression(variables, random.randint(2, 3))
+    
+    # Create SVG diagrams for each expression
     svg_path1 = f'LogicGates/images/random_logic_circuit_{random.randint(1, 10000)}_1.svg'
     svg_path2 = f'LogicGates/images/random_logic_circuit_{random.randint(1, 10000)}_2.svg'
 
     create_and_save_diagram(expr1, svg_path1)
     create_and_save_diagram(expr2, svg_path2)
 
-    # Generate truth tables for both expressions
+    # Generate truth tables for both expressions for final verification
     truth_table1 = generate_truth_table(expr1, variables)
     truth_table2 = generate_truth_table(expr2, variables)
 
-    # Check if the outputs are equivalent
+    # Since we constructed them to differ, this should ideally be False, but we check again to confirm
     equivalent = compare_truth_tables(truth_table1, truth_table2)
 
+    # Prepare the question
     question = f"Are these two circuits equivalent?\nExpression 1: {replace_operators(expr1)}\nExpression 2: {replace_operators(expr2)}"
     options_text = ["True", "False"]
-    correct_answer = 'True' if equivalent else 'False'
-    
-    return (question, options_text, correct_answer, [get_svg_from_file(x) for x in [svg_path1, svg_path2]])
+    correct_answer = 'False' if not equivalent else 'True'  # Should always be 'False'
 
+    return (question, options_text, correct_answer, [get_svg_from_file(x) for x in [svg_path1, svg_path2]])
