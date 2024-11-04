@@ -11,28 +11,33 @@ matplotlib.use('Agg')
 # Function to generate distractor options
 def distractors_options(correct_expr, variables, used_expressions):
     operators = ['and', 'or']
-    max_attempts = 20  # Maximum number of attempts to generate a distinct incorrect expression
+    
+    # Create a list of possible modifications to the expression
+    possible_modifications = []
 
-    for _ in range(max_attempts):
-        split_expr = correct_expr.split()
+    # Generate possible distractors by negating each variable
+    for var in variables:
+        modified_expr = correct_expr.replace(var, f'not ({var})') if f'not ({var})' not in correct_expr else correct_expr.replace(f'not ({var})', var)
+        if modified_expr != correct_expr and modified_expr not in used_expressions:
+            possible_modifications.append(modified_expr)
 
-        if random.choice([True, False]) and any(part in variables for part in split_expr):
-            # Negate a random variable
-            index_to_negate = random.choice([i for i, part in enumerate(split_expr) if part in variables])
-            split_expr[index_to_negate] = f'not ({split_expr[index_to_negate]})' if 'not' not in split_expr[index_to_negate] else split_expr[index_to_negate].replace('not ', '')
-        elif any(part in operators for part in split_expr):
-            # Change an operator
-            index_to_change = random.choice([i for i, part in enumerate(split_expr) if part in operators])
-            split_expr[index_to_change] = random.choice(operators)
+    # Generate possible distractors by changing each operator
+    split_expr = correct_expr.split()
+    for i, part in enumerate(split_expr):
+        if part in operators:
+            for operator in operators:
+                if operator != part:
+                    modified_expr = ' '.join(split_expr[:i] + [operator] + split_expr[i+1:])
+                    if modified_expr != correct_expr and modified_expr not in used_expressions:
+                        possible_modifications.append(modified_expr)
 
-        new_expr = " ".join(split_expr)
+    # Randomly select a distractor from the possible modifications
+    if possible_modifications:
+        new_expr = random.choice(possible_modifications)
+        used_expressions.add(new_expr)
+        return new_expr
 
-        # Ensure the new expression is distinct
-        if new_expr != correct_expr and new_expr not in used_expressions:
-            used_expressions.add(new_expr)
-            return new_expr
-
-    # If all attempts fail, return a simple negation
+    # If no valid distractor was found, return a simple negation
     return f'not ({correct_expr})' if 'not' not in correct_expr else correct_expr.replace('not ', '')
 
 def generate_random_expression(variables):
@@ -111,4 +116,3 @@ def generate_question_expression_identify():
         return ("Which expression corresponds to the given truth table?", options, expr, [svg_path])
 
     return create()
-
