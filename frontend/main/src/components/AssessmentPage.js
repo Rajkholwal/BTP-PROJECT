@@ -105,10 +105,10 @@ const AssessmentPage = () => {
       alert("Please answer all questions before submitting.");
       return;
     }
-    // if (Object.keys(feedback1).length !== questionsData.length) {
-    //   alert("Please provide feedback for all questions before submitting.");
-    //   return;
-    // }
+    if (Object.keys(feedback1).length !== questionsData.length) {
+      alert("Please provide feedback for all questions before submitting.");
+      return;
+    }
     const completeFeedback = {
       selectedOptions: selectedOptions,
       correctOptions: {},
