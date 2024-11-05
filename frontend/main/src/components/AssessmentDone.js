@@ -9,7 +9,7 @@ const AssessmentDone = () => {
     const [loading, setLoading] = useState(true);
     const { questions, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion } = useLocation().state;
     const marksScored = marks[0];
-    const totalMarks = marks[1];
+    const totalMarks = questions.length;
     const seconds = marks[2];
     const percentage1 = (marksScored / totalMarks) * 100;
     const percentage = percentage1.toFixed(2);
