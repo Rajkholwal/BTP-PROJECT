@@ -225,8 +225,8 @@ def Nonoverlapping_MooreFSM(image_dir="StateMachines/images"):
     #     "options": possible_answers,
     #     "correct_answer": correct_answer
     # }
-    labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
-    return question_text, labeled_options, correct_answer, [fsm_graph_svg]
+    # labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
+    return question_text, possible_answers, correct_answer, [fsm_graph_svg]
 def N_O_build_fsm(sequence):
     n = len(sequence)
     states = [f'S{i}' for i in range(n+1)]
@@ -327,8 +327,8 @@ def Overlapping_MooreFSM(image_dir="StateMachines/images"):
     #     "options": possible_answers,
     #     "correct_answer": correct_answer
     # }
-    labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
-    return question_text, labeled_options, correct_answer, [fsm_graph_svg]
+    # labeled_options = [f"{chr(65+i)}. {option}" for i, option in enumerate(possible_answers)]
+    return question_text, possible_answers, correct_answer, [fsm_graph_svg]
 
 def ask_for_completion(transitions, states):
     missing_transition = remove_random_transition(transitions, states)
