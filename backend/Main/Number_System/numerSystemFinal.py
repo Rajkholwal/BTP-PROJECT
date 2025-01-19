@@ -197,7 +197,7 @@ def generate_hexadecimal_options(hexadecimal_number):
 def generate_question_graycode_to_bcd(level):
     binary_number_length = 8
     binary_number = generate_binary_number(binary_number_length)
-    question_text = f"Convert the given Gray code ({binary_number})GRAY into BCD format"
+    question_text = f"Convert the given Gray code ({binary_number}) into BCD format"
     correct_answer = gray_to_bcd(binary_number)
     options,correct_answer = generate_binary_options(correct_answer)
 
@@ -206,7 +206,7 @@ def generate_question_graycode_to_bcd(level):
 # Question type-2
 def generate_question_decimal_to_excess3_bcd(level):
     decimal_number = random.randint(10,99)
-    question_text = f"How do you represent decimal number {decimal_number} in excess 3 BCD code"
+    question_text = f"How do you represent decimal number {decimal_number} in excess 3 BCD code?"
     tens_digit = decimal_number // 10
     ones_digit = decimal_number % 10
     tens_excess_3_bcd = decimal_to_excess_3_bcd(tens_digit)
@@ -218,7 +218,7 @@ def generate_question_decimal_to_excess3_bcd(level):
 # Question type-3
 def generate_question_decimal_to_8421_bcd(level):
     decimal_number = random.randint(10,99)
-    question_text = f"How do you represent decimal number {decimal_number} in 8421 BCD code"
+    question_text = f"How do you represent decimal number {decimal_number} in 8421 BCD code?"
     tens_digit = decimal_number // 10
     ones_digit = decimal_number % 10
     tens_bcd = decimal_to_bcd(tens_digit)
