@@ -510,7 +510,7 @@ def sop_to_minterm2(level):
     sop = gen_sop_numbers(table)
     minterms = table_to_minterms(table)
     answer = minterms[0]
-    question = "What are the minterms exp for the given SOP form ? SOP = {0} (minterms numbers)".format(sop)
+    question = "What are the minterms expression for the given SOP form ? SOP = {0} (minterms numbers)".format(sop)
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
@@ -578,7 +578,7 @@ def sop_to_maxterm2(level):
     sop = gen_sop_numbers(table)
     minterms = table_to_minterms(table)
     answer = minterms[0]
-    question = "What are the maxterms exp for the given SOP form ? SOP = {0} (minterms)".format(sop)
+    question = "What are the maxterms expression for the given SOP form ? SOP = {0} (minterms)".format(sop)
     answer = minterms[0]
     options=[]
     while len(options)<3:
