@@ -324,7 +324,7 @@ def generate_question_conversion(level):
 
 # Question - 1
 def generate_question_floating_Q1(level):
-    decimal_number = random.uniform(0, 10)
+    decimal_number = round(random.uniform(1.0, 100.0), random.choice([2, 3]))
     question_text = f"Write the mantissa (in Hexadecimal) for the decimal number: {decimal_number}"
     float_representation = struct.unpack('f', struct.pack('f', decimal_number))[0]
     binary_representation = format(struct.unpack('!I', struct.pack('!f', float_representation))[0], '032b')
