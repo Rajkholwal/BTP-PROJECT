@@ -156,6 +156,50 @@ const AssessmentDone = () => {
         }, 3000);
     }, []);
 
+    // Save data to the backend
+    const convertedTimeSpentPerQuestion = timeSpentPerQuestion.map(ms => `${(ms / 1000)}s`);
+
+    const selectedOpt = questions.map((question, index) => ({
+
+        selectedOption: question.options[selectedOptions[index]] || 'Not answered',
+    }));
+    const saveAssessmentData = async () => {
+        const data = {
+            questions,
+            marks,
+            seconds,
+            selectedOpt,
+            timeSpentPerQuestion: convertedTimeSpentPerQuestion, 
+        };
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/save-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Data saved:', result);
+            } else {
+                console.error('Failed to save data:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error saving data:', error);
+        }
+    };
+
+    useEffect(() => {
+        setTimeout(() => {
+            setLoading(false);
+        }, 3000);
+
+        saveAssessmentData(); // Trigger data save when the component mounts
+    }, []);
+
     return (
         <div>
             {loading ? (
