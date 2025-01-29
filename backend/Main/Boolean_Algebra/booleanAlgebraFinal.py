@@ -484,7 +484,7 @@ def sop_to_minterm(level):
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
     question = "What are the minterms for the given sop expression: {0}".format(print_sop(sop))
-    answer = minterms[0]
+    answer1 = (minterms[0])
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
@@ -495,7 +495,8 @@ def sop_to_minterm(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
+        answer =str(answer1)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -526,7 +527,7 @@ def sop_to_minterm2(level):
     idx = 'A'
     new_options = []
     for option in options2:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -541,7 +542,7 @@ def sop_to_maxterm(level):
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
     question = "What are the maxterms for the given sop expression: {0}".format(print_sop(sop))
-    answer = minterms[0]
+    answer1 = (minterms[0])
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
@@ -554,19 +555,20 @@ def sop_to_maxterm(level):
         for i in range(2**num_vars):
             if i not in opt:
                 new_opt.append(i)
-        options2.append(new_opt)
+        options2.append((new_opt))
     random.shuffle(options2)
     new_ans = []
     for i in range(2**num_vars):
-        if i not in answer:
+        if i not in answer1:
             new_ans.append(i)
     idx = 'A'
     new_options = []
     for option in options2:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
-    return question, new_options, new_ans
+        answer =str(answer1)
+    return question, new_options, answer
 
 
 def sop_to_maxterm2(level):
@@ -607,7 +609,7 @@ def sop_to_maxterm2(level):
     idx = 'A'
     new_options = []
     for option in options3:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, new_ans
@@ -621,7 +623,7 @@ def pos_to_minterm(level):
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
     question = "What are the minterms for the given pos expression: {0}".format(print_pos(pos))
-    answer = minterms[0]
+    answer1 = (minterms[0])
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
@@ -632,9 +634,10 @@ def pos_to_minterm(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
+        answer =str(answer1)
     return question, new_options, answer
 
 
@@ -647,7 +650,7 @@ def pos_to_maxterm(level):
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
     question = "What are the maxterms for the given pos expression: {0}".format(print_pos(pos))
-    answer = minterms[0]
+    answer1 = (minterms[0])
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
@@ -665,15 +668,16 @@ def pos_to_maxterm(level):
     random.shuffle(options2)
     new_ans = []
     for i in range(2**num_vars):
-        if i not in answer:
+        if i not in answer1:
             new_ans.append(i)
     idx = 'A'
     new_options = []
     for option in options2:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
-    return question, new_options, new_ans
+        answer =str(answer1)
+    return question, new_options, answer
 
 
 def sop_to_pos(level):
@@ -698,7 +702,7 @@ def sop_to_pos(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -726,7 +730,7 @@ def pos_to_sop(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -753,7 +757,7 @@ def minterm_to_sop(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -780,7 +784,7 @@ def minterm_to_pos(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -811,7 +815,7 @@ def maxterm_to_sop(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -842,7 +846,7 @@ def maxterm_to_pos(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -899,7 +903,7 @@ def evaluate(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -980,7 +984,7 @@ def evaluate_2(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -1027,7 +1031,7 @@ def simplify_exp_sop(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -1074,7 +1078,7 @@ def simplify_exp_pos(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -1122,7 +1126,7 @@ def simplify_exp_minterms(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
@@ -1173,19 +1177,18 @@ def simplify_exp_maxterms(level):
     idx = 'A'
     new_options = []
     for option in options:
-        new_option = idx+". "+str(option)
+        new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
     return question, new_options, answer
 
-
 question_list={
     1: sop_to_minterm,
-    2: sop_to_minterm2,
-    3: sop_to_maxterm,
-    4: sop_to_maxterm2,
-    5: pos_to_minterm,
-    6: pos_to_maxterm,
+    2: sop_to_maxterm,
+    3: pos_to_minterm,
+    4: pos_to_maxterm,
+    5: sop_to_minterm2,
+    6: sop_to_maxterm2,
     7: sop_to_pos,
     8: pos_to_sop,
     9: minterm_to_sop,
