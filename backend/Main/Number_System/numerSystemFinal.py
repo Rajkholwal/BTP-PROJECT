@@ -100,7 +100,7 @@ def generate_binary_options(binary_number):
     new_list = []
 
     for option in option_list:
-        new_option = idx+". "+option
+        new_option = option
         if option == binary_number:
             correct_option = new_option
         new_list.append(new_option)
@@ -128,7 +128,7 @@ def generate_octal_options(octal_number):
     new_list = []
 
     for option in option_list:
-        new_option = idx + ". " + option
+        new_option =  option
         if option == octal_number:
             correct_option = new_option
         new_list.append(new_option)
@@ -156,7 +156,7 @@ def generate_decimal_options(decimal_number):
     new_list = []
 
     for option in option_list:
-        new_option = idx + ". " + str(option)
+        new_option =  str(option)
         if option == str(decimal_number):
             correct_option = new_option
         new_list.append(new_option)
@@ -183,7 +183,7 @@ def generate_hexadecimal_options(hexadecimal_number):
     new_list = []
 
     for option in option_list:
-        new_option = idx + ". " + option
+        new_option =  option
         if option == hexadecimal_number:
             correct_option = new_option
         new_list.append(new_option)
