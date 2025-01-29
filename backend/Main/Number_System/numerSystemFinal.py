@@ -325,8 +325,7 @@ def generate_question_conversion(level):
 # Question - 1
 def generate_question_floating_Q1(level):
     decimal_number = round(random.uniform(1.0, 100.0), random.choice([2, 3]))
-    question_text = question_text = f"The decimal number {decimal_number} is represented in IEEE 754 single-precision format. Write the mantissa (in hexadecimal) for this representation."
-
+    question_text = f"Write the mantissa (in Hexadecimal) for the decimal number: {decimal_number}"
     float_representation = struct.unpack('f', struct.pack('f', decimal_number))[0]
     binary_representation = format(struct.unpack('!I', struct.pack('!f', float_representation))[0], '032b')
     sign_bit = binary_representation[0]
@@ -339,30 +338,25 @@ def generate_question_floating_Q1(level):
     
 # Question - 2
 def generate_question_floating_Q2(level):
-    decimal_number = round(random.uniform(1.0, 100.0), random.choice([2, 3]))
-    question_text = f"Write the IEEE-754 32-bit hexadecimal representation for the decimal number: {decimal_number}"
-    float_representation = struct.unpack('f', struct.pack('f', decimal_number))[0]
-    binary_representation = format(struct.unpack('!I', struct.pack('!f', float_representation))[0], '032b')
-    
-    
-    correct_answer = binary_representation[0:]
-    correct_answer = binary_to_hexadecimal(correct_answer)
-    options,correct_answer = generate_hexadecimal_options(correct_answer)
-    return question_text,options,correct_answer
-   
+    return 1
     
 
 
 
 
 def generate_question_floating_numbers(level):
-    floating_number_topic_list = [1, 2]
+    floating_number_topic_list = [1]
     selected_topic = random.choice(floating_number_topic_list)
     if selected_topic == 1:
         return generate_question_floating_Q1(level)
     elif selected_topic == 2:
-        return generate_question_floating_Q2(level)
-       
+        return generate_question_floating_Q1(level)
+        # return generate_question_decimal_to_excess3_bcd(level)
+    # elif selected_topic == 3:
+    #     return generate_question_decimal_to_8421_bcd(level)
+
+
+# Binary Arithimetic Questions...
 
 # utilities
 def generate_random_binary(length=8, decimal_places=4):
