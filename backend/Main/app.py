@@ -198,18 +198,24 @@ def startAssessment():
 def submit_assessment():
     data = request.json
     print('Received assessment data:', data)
-
+    
     total_marks = 0
     marks_scored = 0
 
-    for key, values in data['feedback1'].items():
+    # data['feedback1'] is a dict whose keys match question indices
+    # data['selectedOptions'] is an array
+    # data['correctOptions'] is also a dict or object in JS (use the question index as a key)
+    for key in data['feedback1'].keys():
         idx = int(key)
         total_marks += 1
-        selected_answer = int(data['selectedOptions'][idx])
-        correct_answer = int(data['correctOptions'][key])
 
-        if selected_answer == correct_answer:
-            marks_scored += 1
+        # selected_answer = int(data['selectedOptions'][idx])
+        # # Make sure to convert the correct option from data['correctOptions'][idx] 
+        # # (which might be a string key if you set it that way)
+        # correct_answer = int(data['correctOptions'][key])
+
+        # if selected_answer == correct_answer:
+        #     marks_scored += 1
 
     return jsonify({'total_marks': total_marks, 'marks_scored': marks_scored})
 
