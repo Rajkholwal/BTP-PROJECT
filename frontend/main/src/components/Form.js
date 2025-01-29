@@ -85,7 +85,7 @@ const QuizForm = (props) => {
 
   }
 
-  const tags = ['Number-System', 'Boolean-algebra','MOhit'];
+  const tags = ['Number-System', 'Boolean-algebra'];
   const levels = ['Easy', 'Medium'];
 
   return (
