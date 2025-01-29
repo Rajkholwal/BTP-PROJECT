@@ -171,7 +171,7 @@ def generate_hexadecimal_options(hexadecimal_number):
     while len(options) < 4:
         answer_list = list(hexadecimal_number)
         flip_index = random.randint(0, len(answer_list) - 1)
-        new_digit = random.choice('0123456789ABCDEF')  # Generate a random hexadecimal digit
+        new_digit = random.choice('0123456789abcdef')  # Generate a random hexadecimal digit
         answer_list[flip_index] = new_digit
         options.add(''.join(answer_list))
 
