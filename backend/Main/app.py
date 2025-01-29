@@ -209,13 +209,13 @@ def submit_assessment():
         idx = int(key)
         total_marks += 1
 
-        # selected_answer = int(data['selectedOptions'][idx])
+        selected_answer = int(data['selectedOptions'][idx])
         # # Make sure to convert the correct option from data['correctOptions'][idx] 
         # # (which might be a string key if you set it that way)
-        # correct_answer = int(data['correctOptions'][key])
+        correct_answer = int(data['correctOptions'][key])
 
-        # if selected_answer == correct_answer:
-        #     marks_scored += 1
+        if selected_answer == correct_answer:
+            marks_scored += 1
 
     return jsonify({'total_marks': total_marks, 'marks_scored': marks_scored})
 
