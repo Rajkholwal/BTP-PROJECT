@@ -483,7 +483,7 @@ def sop_to_minterm(level):
         table = gen_random_truth_table(random.randint(3,4))
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the minterms for the given SOP expression: {0}".format(print_sop(sop))
+    question = "What are the minterms for the given SOP expression ? SOP = {0}".format(print_sop(sop))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -542,7 +542,7 @@ def sop_to_maxterm(level):
     table = gen_random_truth_table(num_vars)
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the maxterms for the given SOP expression: {0}".format(print_sop(sop))
+    question = "What are the maxterms for the given SOP expression ? SOP = {0}".format(print_sop(sop))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -581,7 +581,7 @@ def sop_to_maxterm2(level):
     sop = gen_sop_numbers(table)
     minterms = table_to_minterms(table)
     answer = minterms[0]
-    question = "What is the maxterm expression for the given SOP expression? SOP = {0}".format(sop)
+    question = "What is the maxterm expression for the given SOP expression ? SOP = {0}".format(sop)
     options = []
     while len(options) < 3:
         m = manipulate_dc(table)
@@ -619,7 +619,7 @@ def pos_to_minterm(level):
         table = gen_random_truth_table(random.randint(3,4))
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the minterms for the given POS expression: {0}".format(print_pos(pos))
+    question = "What are the minterms for the given POS expression ? POS = {0}".format(print_pos(pos))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -646,7 +646,7 @@ def pos_to_maxterm(level):
     table = gen_random_truth_table(num_vars)
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the maxterms for the given POS expression: {0}".format(print_pos(pos))
+    question = "What are the maxterms for the given POS expression ? POS = {0}".format(print_pos(pos))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -1212,7 +1212,7 @@ def test():
 
 #final function needs to be combined with generator.py
 def generate_question_boolean_algebra(level):
-    q,o,a = question_list[random.randint(1,17)](level)
+    q,o,a = question_list[random.randint(1,6)](level)
     return q,o,a
 
 if __name__ == "__main__":
