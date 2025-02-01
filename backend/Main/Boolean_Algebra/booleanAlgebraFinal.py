@@ -483,7 +483,7 @@ def sop_to_minterm(level):
         table = gen_random_truth_table(random.randint(3,4))
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the minterms for the given sop expression: {0}".format(print_sop(sop))
+    question = "What are the minterms for the given SOP expression: {0}".format(print_sop(sop))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -511,18 +511,19 @@ def sop_to_minterm2(level):
     sop = gen_sop_numbers(table)
     minterms = table_to_minterms(table)
     answer = minterms[0]
-    question = "What are the minterms expression for the given SOP form ? SOP = {0} (minterms numbers)".format(sop)
+    question = "What is the minterm expression for the given SOP expression ? SOP = {0} ".format(sop)
     options=[]
     while len(options)<3:
         m=manipulate_dc(table)
         if m and m not in options:
             options.append(m)
-    options.append(minterms[0])
+    
     char = get_starting_character(num_vars)
     answer = print_sop(gen_sop(list_to_table(minterms[0], num_vars), 1, char))
     options2 = []
     for opt in options:
         options2.append(print_sop(gen_sop(list_to_table(opt, num_vars), 1, char)))
+    options2.append(answer)
     random.shuffle(options2)
     idx = 'A'
     new_options = []
@@ -541,7 +542,7 @@ def sop_to_maxterm(level):
     table = gen_random_truth_table(num_vars)
     sop = gen_sop(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the maxterms for the given sop expression: {0}".format(print_sop(sop))
+    question = "What are the maxterms for the given SOP expression: {0}".format(print_sop(sop))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -567,51 +568,47 @@ def sop_to_maxterm(level):
         new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
-        answer =str(answer1)
+        answer =str(new_ans)
     return question, new_options, answer
 
 
 def sop_to_maxterm2(level):
-    if level==1:
+    if level == 1:
         num_vars = 3
     else:
-        num_vars = random.randint(3,4)
+        num_vars = random.randint(3, 4)
     table = gen_random_truth_table(num_vars)
     sop = gen_sop_numbers(table)
     minterms = table_to_minterms(table)
     answer = minterms[0]
-    question = "What are the maxterms expression for the given SOP form ? SOP = {0} (minterms)".format(sop)
-    answer = minterms[0]
-    options=[]
-    while len(options)<3:
-        m=manipulate_dc(table)
+    question = "What is the maxterm expression for the given SOP expression? SOP = {0}".format(sop)
+    options = []
+    while len(options) < 3:
+        m = manipulate_dc(table)
         if m and m not in options:
             options.append(m)
-    options.append(minterms[0])
     options2 = []
     for opt in options:
         new_opt = []
-        for i in range(2**num_vars):
+        for i in range(2 ** num_vars):
             if i not in opt:
                 new_opt.append(i)
         options2.append(new_opt)
-    random.shuffle(options2)
-    new_ans = []
-    for i in range(2**num_vars):
-        if i not in answer:
-            new_ans.append(i)
-
+    # Prepare the correct answer
+    new_ans_indices = [i for i in range(2 ** num_vars) if i not in answer]
     char = get_starting_character(num_vars)
-    new_ans = print_pos(gen_pos(list_to_table(minterms[0], num_vars), 1, char))
+    new_ans = print_pos(gen_pos(list_to_table(new_ans_indices, num_vars), 1, char))
+    # Generate options
     options3 = []
     for opt in options2:
-        options3.append(print_pos(gen_pos(list_to_table(opt, num_vars), 1, char)))
-    idx = 'A'
-    new_options = []
-    for option in options3:
-        new_option =str(option)
-        new_options.append(new_option)
-        idx = chr(ord(idx) + 1)
+        pos_expression = print_pos(gen_pos(list_to_table(opt, num_vars), 1, char))
+        options3.append(pos_expression)
+    # Append the correct answer once
+    options3.append(new_ans)
+    # Shuffle options
+    random.shuffle(options3)
+    # Prepare the final options list
+    new_options = [str(option) for option in options3]
     return question, new_options, new_ans
 
 
@@ -622,7 +619,7 @@ def pos_to_minterm(level):
         table = gen_random_truth_table(random.randint(3,4))
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the minterms for the given pos expression: {0}".format(print_pos(pos))
+    question = "What are the minterms for the given POS expression: {0}".format(print_pos(pos))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -649,7 +646,7 @@ def pos_to_maxterm(level):
     table = gen_random_truth_table(num_vars)
     pos = gen_pos(table, 0, 'A')
     minterms = table_to_minterms(table)
-    question = "What are the maxterms for the given pos expression: {0}".format(print_pos(pos))
+    question = "What are the maxterms for the given POS expression: {0}".format(print_pos(pos))
     answer1 = (minterms[0])
     options=[]
     while len(options)<3:
@@ -676,7 +673,7 @@ def pos_to_maxterm(level):
         new_option =str(option)
         new_options.append(new_option)
         idx = chr(ord(idx) + 1)
-        answer =str(answer1)
+        answer =str(new_ans)
     return question, new_options, answer
 
 
@@ -690,7 +687,7 @@ def sop_to_pos(level):
     char = get_starting_character(num_vars)
     sop = gen_sop(table, 1, char)
     pos = gen_pos(table, 1, char)
-    question = "Convert the expression {0} to POS form".format(print_sop(sop))
+    question = "Convert the expression {0} to POS expression".format(print_sop(sop))
     answer = print_pos(pos)
     options=[]
     while len(options)<3:
@@ -718,7 +715,7 @@ def pos_to_sop(level):
     char = get_starting_character(num_vars)
     sop = gen_sop(table, 1 , char)
     pos = gen_pos(table, 1, char)
-    question = "Convert the expression {0} to SOP form".format(print_pos(pos))
+    question = "Convert the expression {0} to SOP expression".format(print_pos(pos))
     answer = print_sop(sop)
     options=[]
     options.append(answer)
@@ -745,7 +742,7 @@ def minterm_to_sop(level):
     char = get_starting_character(num_vars)
     sop = gen_sop(table, 1, char)
     minterms, num = table_to_minterms(table)
-    question = "The SOP for the given minterms - {0} is?".format(minterms)
+    question = "What is the SOP expression for the given minterms - {0} is?".format(minterms)
     answer = print_sop(sop)
     options=[]
     options.append(answer)
@@ -772,7 +769,7 @@ def minterm_to_pos(level):
     char = get_starting_character(num_vars)
     pos = gen_pos(table, 1, char)
     minterms, num = table_to_minterms(table)
-    question = "The POS for the given minterms - {0} is?".format(minterms)
+    question = "What is the POS expression for the given minterms - {0} is?".format(minterms)
     answer = print_pos(pos)
     options=[]
     options.append(answer)
@@ -803,7 +800,7 @@ def maxterm_to_sop(level):
     for i in range(2**num_vars):
         if i not in minterms:
             maxterms.append(i)
-    question = "The SOP for the given maxterms - {0} is?".format(maxterms)
+    question = "What is the SOP for the given maxterms - {0} is?".format(maxterms)
     answer = print_sop(sop)
     options=[]
     options.append(answer)
@@ -834,7 +831,7 @@ def maxterm_to_pos(level):
     for i in range(2**num_vars):
         if i not in minterms:
             maxterms.append(i)
-    question = "The POS for the given maxterms - {0} is?".format(maxterms)
+    question = "What is the POS for the given maxterms - {0} is?".format(maxterms)
     answer = print_pos(pos)
     options=[]
     options.append(answer)
