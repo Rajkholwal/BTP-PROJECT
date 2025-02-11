@@ -20,7 +20,7 @@ const Firstpage = () => {
     const [loading, setLoading] = useState(true)
     const [selectedOption, setSelectedOption] = useState(null);
     const [clickedImage, setClickedImage] = useState(0);
-
+    const feedbackFormLink = "https://docs.google.com/forms/d/1olMjHfmbrhPrhjl35su0kN_OX600hA60nAxo1-BEvlk/edit";
     // const onSuccessLogin = (res) => {
     //     console.log("Login Success current user:")
     //     const { name, email } = res.profileObj
@@ -45,8 +45,8 @@ const Firstpage = () => {
             setClickedImage(1);
         }
     };
-    const handleGo = () =>{
-        if(selectedOption==null){
+    const handleGo = () => {
+        if (selectedOption == null) {
             alert('Please select one of the option')
             return
         }
@@ -152,10 +152,11 @@ const Firstpage = () => {
                                         </button>
                                         <br />
                                     </div>
+
                                     <div class="mx-auto max-w-7xl px-6 lg:px-8">
                                         <div class="mx-auto max-w-2xl lg:text-center">
                                             <p class="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Attempt Your personalized quiz and assess yourself</p>
-                                            <p class="mt-6 text-lg leading-8 text-gray-600 mb-3">Sign in using any of your google account to generate quiz. You can also start an assessment and generate your marks.</p>
+                                            <p class="mt-6 text-lg leading-8 text-gray-600 mb-3">We value your feedback! If you encountered any issues or have suggestions to improve the website, please let us know.</p>
 
                                             {/* <h2 class="text-base font-semibold leading-7 text-indigo-600"><GoogleLogin
                                                 clientId={clientId}
@@ -165,8 +166,17 @@ const Firstpage = () => {
                                                 cookiePolicy={'single_host_origin'}
                                                 isSignedIn={true}
                                             /></h2> */}
+                                            <div className="feedback-btn-container">
+                                                <button
+                                                    onClick={() => window.open(feedbackFormLink, '_blank')}
+                                                    className="feedback-btn"
+                                                >
+                                                    Provide Feedback
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
+
                                 </div>
 
                             )}
