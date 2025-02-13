@@ -350,17 +350,197 @@ def generate_question_floating_Q2(level):
     return question_text,options,correct_answer
    
     
+def generate_question_reverse_floating(level):
+    # Generate a random decimal number with up to 4 decimal digits
+    decimal_number = round(random.uniform(-1000.0, 1000.0), random.randint(0, 4))
+    
+    # Convert the decimal number to its IEEE-754 32-bit hexadecimal representation
+    packed = struct.pack('!f', decimal_number)
+    float_hex = struct.unpack('!I', packed)[0]
+    hex_representation = f"0x{float_hex:08X}"
+
+    # Generate multiple-choice options
+    options = []
+    correct_answer = f"{decimal_number}"
+
+    # Add the correct answer to options
+    options.append(correct_answer)
+
+    # Generate three incorrect options
+    while len(options) < 4:
+        # Generate a distractor decimal number with up to 4 decimal digits
+        distractor = round(decimal_number + random.uniform(-100.0, 100.0), random.randint(0, 4))
+        # Ensure the distractor is unique and not equal to the correct answer
+        if distractor != decimal_number and f"{distractor}" not in options:
+            options.append(f"{distractor}")
+
+    # Shuffle the options
+    random.shuffle(options)
+
+    # The correct answer is the actual decimal value as a string
+    correct_answer_str = correct_answer
+
+    # Create the question text
+    question_text = (
+        f"In IEEE floating point representation, the hexadecimal number {hex_representation} corresponds to which of the following decimal numbers?"
+    )
+
+    return question_text, options, correct_answer_str
 
 
+def generate_question_twos_complement1(level):
+    # Generate a random 16-bit binary number
+    num = random.randint(1, 0xFFFF)  # Exclude zero to avoid trivial cases
+    binary_num = f"{num:016b}"
+    
+    # Compute the 2's complement of the binary number
+    # Step 1: Invert the bits
+    inverted_bits = ''.join('1' if bit == '0' else '0' for bit in binary_num)
+    # Step 2: Add 1 to the inverted bits
+    twos_complement_int = int(inverted_bits, 2) + 1
+    # Ensure it's a 16-bit representation
+    twos_complement = f"{twos_complement_int & 0xFFFF:016b}"
+    
+    # Set the correct answer
+    correct_answer = twos_complement
+    
+    # Generate multiple-choice options
+    options = [correct_answer]
+    
+    # Generate three incorrect options (distractors)
+    while len(options) < 4:
+        # Generate a random 16-bit binary number as a distractor
+        distractor_int = random.randint(0, 0xFFFF)
+        distractor = f"{distractor_int:016b}"
+        # Ensure the distractor is unique and not the correct answer
+        if distractor != correct_answer and distractor not in options:
+            options.append(distractor)
+    
+    # Shuffle the options
+    random.shuffle(options)
+    
+    # Create the question text
+    question_text = (
+        f"Given the 16-bit binary number:\n"
+        f"{binary_num}\n"
+        f"What is its 2's complement representation?"
+    )
+    
+    return question_text, options, correct_answer
+def generate_ieee754_float_question(level):
+    # Function to generate a random valid IEEE 754 single-precision floating-point number
+    def generate_valid_float_bits(used_patterns):
+        while True:
+            # Generate a random sign bit (0 or 1)
+            sign_bit = random.choice(['0', '1'])
 
+            # Generate exponent bits (8 bits), avoiding all zeros and all ones
+            exponent_bits = ''.join(random.choices(['0', '1'], k=8))
+            if exponent_bits in ['00000000', '11111111']:
+                continue  # Skip subnormal numbers and special cases
+
+            # Generate fraction bits (23 bits)
+            fraction_bits = ''.join(random.choices(['0', '1'], k=23))
+
+            # Combine the bits into a 32-bit binary string
+            bit_pattern = sign_bit + exponent_bits + fraction_bits
+
+            # Check if this bit pattern has already been used
+            if bit_pattern in used_patterns:
+                continue  # Generate a new pattern
+
+            # Add this pattern to the set of used patterns
+            used_patterns.add(bit_pattern)
+
+            # Convert the binary string to an integer
+            int_representation = int(bit_pattern, 2)
+
+            # Pack the integer into bytes and unpack as a float
+            packed = int_representation.to_bytes(4, byteorder='big')
+            decimal_value = struct.unpack('!f', packed)[0]
+
+            # Check if the decimal value is finite (exclude infinities and NaN)
+            if not (decimal_value != decimal_value or decimal_value == float('inf') or decimal_value == float('-inf')):
+                # Round the decimal value to a reasonable number of decimal places
+                decimal_value_rounded = round(decimal_value, 2)
+                # Ensure the decimal value is within a readable range
+                if -1e7 < decimal_value_rounded < 1e7:
+                    return sign_bit, exponent_bits, fraction_bits, decimal_value_rounded
+
+    # Initialize a set to keep track of used bit patterns
+    # For uniqueness within a session
+    if not hasattr(generate_ieee754_float_question, "used_patterns"):
+        generate_ieee754_float_question.used_patterns = set()
+
+    used_patterns = generate_ieee754_float_question.used_patterns
+
+    # Generate a valid floating-point bit pattern and its decimal value
+    sign_bit, exponent_bits, fraction_bits, decimal_value = generate_valid_float_bits(used_patterns)
+
+    # Prepare the correct answer as a string
+    correct_answer = f"{decimal_value}"
+
+    # Generate multiple-choice options
+    options = [correct_answer]
+    distractor_values = set([decimal_value])
+
+    # Adjust the range based on the difficulty level
+    if level == 1:
+        distractor_range = (-50, 50)
+    elif level == 2:
+        distractor_range = (-20, 20)
+    elif level == 3:
+        distractor_range = (-10, 10)
+    else:
+        distractor_range = (-50, 50)  # Default range
+
+    # Generate three incorrect options (distractors)
+    while len(options) < 4:
+        # Generate a distractor decimal value
+        distractor_value = decimal_value + random.uniform(*distractor_range)
+        distractor_value_rounded = round(distractor_value, 2)
+
+        # Ensure the distractor is unique and not equal to the correct answer
+        if distractor_value_rounded != decimal_value and distractor_value_rounded not in distractor_values:
+            distractor_str = f"{distractor_value_rounded}"
+            options.append(distractor_str)
+            distractor_values.add(distractor_value_rounded)
+
+    # Shuffle the options
+    random.shuffle(options)
+
+    # Format the bit pattern into the three parts for readability
+    formatted_bit_pattern = f"{sign_bit} {exponent_bits} {fraction_bits}"
+
+    # Create the question text
+    question_text = (
+        "The following bit pattern represents a floating point number in IEEE 754 single precision format:\n"
+        f"{formatted_bit_pattern}\n"
+        "The value of the number in decimal form is:"
+    )
+
+    return question_text, options, correct_answer
+
+def generate_question_twos_complement(level):
+    twos_compliment_topic_list = [1, 2]
+    selected_topic = random.choice(twos_compliment_topic_list)
+    if selected_topic == 1:
+        return generate_question_twos_complement1(level)
+    elif selected_topic == 2:
+        return generate_question_twos_complement1(level)
+    
 
 def generate_question_floating_numbers(level):
-    floating_number_topic_list = [1, 2]
+    floating_number_topic_list = [1, 2, 3, 4]
     selected_topic = random.choice(floating_number_topic_list)
     if selected_topic == 1:
         return generate_question_floating_Q1(level)
     elif selected_topic == 2:
         return generate_question_floating_Q2(level)
+    elif selected_topic == 3:
+        return generate_question_reverse_floating(level)
+    elif selected_topic == 4:
+        return  generate_ieee754_float_question(level)
        
 
 # utilities
@@ -428,7 +608,7 @@ def generate_question_binary_arithimetic(level):
 
 # Overall function
 def generate_question_number_system(level):
-    number_system_topic_list = [1,2,3,4]
+    number_system_topic_list = [1, 2, 3, 4, 5]
     selected_topic = random.choice(number_system_topic_list)
     if selected_topic == 1:
         return generate_question_binary_codes(level)
@@ -438,6 +618,8 @@ def generate_question_number_system(level):
         return generate_question_floating_numbers(level)
     elif selected_topic == 4:
         return generate_question_binary_arithimetic(level)
+    elif selected_topic == 5:
+        return generate_question_twos_complement(level)
 
 if __name__ == "__main__":
     ans = generate_question_number_system(1)
