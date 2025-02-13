@@ -309,7 +309,8 @@ const AssessmentDone = () => {
         saveAssessmentData();
     }, []);
 
-    return (
+ 
+        return (
         <div>
             {loading ? (
                 <LoadingResult />
@@ -321,17 +322,35 @@ const AssessmentDone = () => {
                             <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-4">
                                 <div className="mx-auto flex max-w-xs flex-col gap-y-4">
                                     <dt className="text-base leading-7 text-gray-600">Total questions</dt>
-                                    <dd className="text-3xl font-semibold tracking-tight text-gray-900">{totalMarks}</dd>
+                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{totalMarks}</dd>
                                 </div>
                                 <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                                    <dt className="text-base leading-7 text-gray-600">Correct answers</dt>
-                                    <dd className="text-3xl font-semibold tracking-tight text-gray-900">{marksScored}</dd>
+                                    <dt className="text-base leading-7 text-gray-600">Questions solved correctly</dt>
+                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{marksScored}</dd>
+                                </div>
+                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
+                                    <dt className="text-base leading-7 text-gray-600">Percentage secured</dt>
+                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{percentage}%</dd>
+                                </div>
+                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
+                                    <dt className="text-base leading-7 text-gray-600">Time taken</dt>
+                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{seconds}</dd>
                                 </div>
                             </dl>
                         </div>
                         <br />
                         <div className="mt-10 flex items-center justify-center gap-x-6">
-                            <button onClick={() => generatePDF(questions)} className="bg-indigo-600 px-4 py-2 text-white rounded">Download PDF</button>
+                        <button onClick={() => generatePDF(questions)} className="bg-indigo-600 px-4 py-2 text-white rounded">Download complete PDF with answers</button>
+                            <button onClick={() => navigate('/')} className="text-sm font-semibold leading-6 text-gray-900">
+                                Attempt another quiz<span aria-hidden="true">→</span>
+                            </button>
+                            <button
+                                onClick={() => navigate('/review-assessment', { state: { questions, marks, seconds,selectedOptions, timeSpentPerQuestion } })}
+                                className="bg-green-500 text-white font-semibold leading-6 px-4 py-2 rounded transition duration-200 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                            >
+                                Review Assessment<span aria-hidden="true">→</span>
+                            </button>
+
                         </div>
                     </div>
                 </>
@@ -341,3 +360,6 @@ const AssessmentDone = () => {
 }
 
 export default AssessmentDone;
+{/* <div className="mt-10 flex items-center justify-center gap-x-6">
+                            <button onClick={() => generatePDF(questions)} className="bg-indigo-600 px-4 py-2 text-white rounded">Download PDF</button>
+                        </div> */}

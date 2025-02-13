@@ -74,49 +74,52 @@ const QuizForm = (props) => {
 
 
   const handleGeneratePdf = async (event) => {
-      console.log(selectedTags);
-      console.log(selectedLevel);
-      console.log(numQuestions);
-      event.preventDefault();
-  
-      // Create payload to send to the server
-      const payload = {
-          tags: selectedTags,
-          level: selectedLevel,
-          numQuestions: numQuestions,
-      };
-  
-      try {
-          // Send POST request to the Flask server
-          const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_quiz`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload),
-          });
-  
-          // Handle the response as needed
-          if (response.ok) {
-              const responseData = await response.json(); // Assuming response contains quiz data
-              alert('Quiz submitted successfully!');
-              setgenerated(0);
-  
-              // Generate PDF with returned quiz data
-              if (responseData.questions) {
-                  await generatePDF(responseData.questions);
-              } else {
-                  console.error('No questions returned from server.');
-              }
-          } else {
-              console.error('Failed to submit quiz.');
-              console.log(response.statusText);
-          }
-      } catch (error) {
-          console.error('Error:', error);
-      }
-  };
-  
+    event.preventDefault();
+
+    console.log("Selected Tags:", selectedTags);
+    console.log("Selected Level:", selectedLevel);
+    console.log("Number of Questions:", numQuestions);
+
+    const payload = {
+        tags: selectedTags,
+        level: selectedLevel,
+        numQuestions: numQuestions,
+    };
+
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_quiz`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+            const responseData = await response.json();  // Get quiz data
+            alert('Quiz submitted successfully!');
+
+            if (responseData.questions && responseData.questions.length > 0) {
+                console.log("Generating PDF with questions:", responseData.questions);
+                
+                // Generate and immediately download the PDF
+                await generatePDF(responseData.questions);
+                console.log("PDF generated and downloaded successfully!");
+            } else {
+                console.error('No questions returned from the server.');
+                alert('No questions were received to generate the PDF.');
+            }
+        } else {
+            console.error('Failed to submit quiz.');
+            console.log(response.statusText);
+            alert('Quiz submission failed.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the quiz.');
+    }
+};
+
   
 
   const handleStartAssessment = async (event) => {
@@ -209,12 +212,12 @@ const QuizForm = (props) => {
 
               {/* Submit Button */}
               <div className="mt-4">
-                <button
+                {/* <button
                   onClick={handleGeneratePdf}
                   className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                 >
                   Generate PDF
-                </button>
+                </button> */}
                 <button
                   onClick={handleStartAssessment}
                   className="ml-8 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
