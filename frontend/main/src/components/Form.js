@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import UpperNav from './UpperNav';
+import generatePDF from './generatePDF';
+
 
 const QuizForm = (props) => {
   const [selectedTags, setSelectedTags] = useState([]);
@@ -33,41 +35,89 @@ const QuizForm = (props) => {
     setNumQuestions(inputValue);
   };
 
+  // const handleGeneratePdf = async (event) => {
+  //   console.log(selectedTags)
+  //   console.log(selectedLevel)
+  //   console.log(numQuestions)
+  //   event.preventDefault();
+
+  //   // Create payload to send to the server
+  //   const payload = {
+  //     tags: selectedTags,
+  //     level: selectedLevel,
+  //     numQuestions: numQuestions,
+  //   };
+
+  //   try {
+  //     // Send POST request to the Flask server
+  //     const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_quiz`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     // Handle the response as needed
+  //     if (response.ok) {
+  //       alert('Quiz submitted successfully!');
+  //       setgenerated(0)
+  //     } else {
+  //       console.error('Failed to submit quiz.');
+  //       console.log(response.statusText)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error:', error);
+  //   }
+  // };
+  // Import the generatePDF function from another file
+
+
   const handleGeneratePdf = async (event) => {
-    console.log(selectedTags)
-    console.log(selectedLevel)
-    console.log(numQuestions)
-    event.preventDefault();
-
-    // Create payload to send to the server
-    const payload = {
-      tags: selectedTags,
-      level: selectedLevel,
-      numQuestions: numQuestions,
-    };
-
-    try {
-      // Send POST request to the Flask server
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_quiz`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      // Handle the response as needed
-      if (response.ok) {
-        alert('Quiz submitted successfully!');
-        setgenerated(0)
-      } else {
-        console.error('Failed to submit quiz.');
-        console.log(response.statusText)
+      console.log(selectedTags);
+      console.log(selectedLevel);
+      console.log(numQuestions);
+      event.preventDefault();
+  
+      // Create payload to send to the server
+      const payload = {
+          tags: selectedTags,
+          level: selectedLevel,
+          numQuestions: numQuestions,
+      };
+  
+      try {
+          // Send POST request to the Flask server
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_quiz`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+          });
+  
+          // Handle the response as needed
+          if (response.ok) {
+              const responseData = await response.json(); // Assuming response contains quiz data
+              alert('Quiz submitted successfully!');
+              setgenerated(0);
+  
+              // Generate PDF with returned quiz data
+              if (responseData.questions) {
+                  await generatePDF(responseData.questions);
+              } else {
+                  console.error('No questions returned from server.');
+              }
+          } else {
+              console.error('Failed to submit quiz.');
+              console.log(response.statusText);
+          }
+      } catch (error) {
+          console.error('Error:', error);
       }
-    } catch (error) {
-      console.error('Error:', error);
-    }
   };
+  
+  
 
   const handleStartAssessment = async (event) => {
     // Create payload to send to the server
