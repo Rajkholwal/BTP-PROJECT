@@ -11,37 +11,21 @@ const AssessmentPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [questionsData, setQuestionsData] = useState([]);
-  
-  // Grab data from the route/state
-  const {
-    numQuestions,
-    selectedTags,
-    selectedLevel,
-    loggedInName,
-    loggedInEmail,
-    loggedInType,
-  } = useLocation().state;
-
+  const { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } = useLocation().state;
   const [selectedOptions, setSelectedOptions] = useState(Array(numQuestions).fill(null));
   const [feedback1, setFeedback1] = useState({});
+  const [seconds, setSeconds] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  
   const [overallTimer, setOverallTimer] = useState(0);
-  const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState(
-    Array(parseInt(numQuestions)).fill(0)
-  );
+  const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState(Array(parseInt(numQuestions)).fill(0));
   const [timerIntervals, setTimerIntervals] = useState([]);
-  
+  const sliderRef = useRef(null);
   const [isHovering1, setIsHovering1] = useState(false);
-  const [hoveredEmoji, setHoveredEmoji] = useState(null);
-
   let timerIntervalId;
-
-  // Fetch question data on mount
   useEffect(() => {
     const fetchQuestionData = async () => {
-      if (localStorage.getItem('questionsFetched')) {
-        setQuestionsData(JSON.parse(localStorage.getItem('questionsFetched')));
+      if (localStorage.getItem("questionsFetched")) {
+        setQuestionsData(JSON.parse(localStorage.getItem("questionsFetched")));
         setLoading(false);
         return;
       }
@@ -51,8 +35,6 @@ const AssessmentPage = () => {
           level: selectedLevel,
           numQuestions: numQuestions,
         };
-        // Example: fetch from your /startAssessment route
-        // Adjust according to your actual server endpoint
         const response = await fetch(`${process.env.REACT_APP_API_URL}/startAssessment`, {
           method: 'POST',
           headers: {
@@ -62,36 +44,33 @@ const AssessmentPage = () => {
         });
         const data = await response.json();
         setQuestionsData(data.questions);
-
-        // Initialize timeSpent array
         for (let i = 0; i < data.questions.length; i++) {
           timeSpentPerQuestion[i] = 0;
         }
         setLoading(false);
-        localStorage.setItem('questionsFetched', JSON.stringify(data.questions));
+        localStorage.setItem("questionsFetched", JSON.stringify(data.questions));
+
       } catch (error) {
         console.error(error);
         setLoading(false);
       }
     };
     fetchQuestionData();
-  }, [numQuestions, selectedLevel, selectedTags, timeSpentPerQuestion]);
+  }, [numQuestions, selectedLevel, selectedTags]);
 
-  // Overall Timer
   useEffect(() => {
     const overallTimerInterval = setInterval(() => {
       setOverallTimer(prevOverallTimer => prevOverallTimer + 1000);
     }, 1000);
+
     return () => clearInterval(overallTimerInterval);
   }, []);
 
-  // Create placeholders for timer intervals
   useEffect(() => {
-    const intervals = questionsData.map(() => null);
+    const intervals = questionsData.map((_, index) => null);
     setTimerIntervals(intervals);
   }, [questionsData]);
 
-  // Format milliseconds into Mins + Secs
   const formatTime = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -99,14 +78,12 @@ const AssessmentPage = () => {
     return `${minutes > 0 ? `${minutes}m ` : ''}${seconds}s`;
   };
 
-  // Handle radio option selection
   const handleOptionSelect = (questionIndex, optionIndex) => {
     const newSelectedOptions = [...selectedOptions];
     newSelectedOptions[questionIndex] = optionIndex;
     setSelectedOptions(newSelectedOptions);
   };
 
-  // Feedback (emojis)
   const handleFeedbackChange1 = (questionIndex, feedbackType) => {
     setFeedback1(prevFeedback => ({
       ...prevFeedback,
@@ -122,69 +99,71 @@ const AssessmentPage = () => {
     setCurrentQuestion(prevQuestion => Math.min(questionsData.length - 1, prevQuestion + 1));
   };
 
-  // **No backend submission** - Calculate marks on the frontend
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     clearInterval(timerIntervalId);
-
-    // Ensure each question is answered
     if (selectedOptions.includes(null)) {
-      alert('Please answer all questions before submitting.');
+      alert("Please answer all questions before submitting.");
       return;
     }
-
-    // Ensure each question has feedback
     if (Object.keys(feedback1).length !== questionsData.length) {
-      alert('Please provide feedback for all questions before submitting.');
+      alert("Please provide feedback for all questions before submitting.");
       return;
     }
+    const completeFeedback = {
+      selectedOptions: selectedOptions,
+      correctOptions: {},
+      feedback1: feedback1,
+      name: loggedInName,
+      email: loggedInEmail,
+      type: loggedInType,
+      questionBodies: questionsData,
+      timeTaken: overallTimer,
+      individualTimeTaken: timeSpentPerQuestion
+    };
 
-    // Calculate total marks vs. marks scored
-    let totalMarks = questionsData.length;
-    let marksScored = 0;
-
-    // For each question, figure out the correct option index
     questionsData.forEach((question, index) => {
-      const correctIndex = question.options.indexOf(question.answer);
-      if (correctIndex === selectedOptions[index]) {
-        marksScored++;
+      // if (question.answer[0][0] === 'A') {
+      //   completeFeedback.correctOptions[index.toString()] = "0";
+      // } else if (question.answer[0][0] === 'B') {
+      //   completeFeedback.correctOptions[index.toString()] = "1";
+      // } else if (question.answer[0][0] === 'C') {
+      //   completeFeedback.correctOptions[index.toString()] = "2";
+      // } else {
+      //   completeFeedback.correctOptions[index.toString()] = "3";
+      // }
+      for(let i=0; i<question.options.length; i++){
+        if (question.options[i] === question.answer)
+          completeFeedback.correctOptions[index] = i;
       }
     });
 
-    // Prepare data to show on results page
-    const completeTime = formatTime(overallTimer);
-    const marksInfo = [marksScored, totalMarks, completeTime];
-
-    // Clear local storage if needed
-    localStorage.clear();
-
-    // Navigate to next page (AssessmentDone), passing results
-    navigate('/AssessmentDone', {
-      state: {
-        questions: questionsData,
-        marks: marksInfo,            // [marksScored, totalMarks, timeString]
-        loggedInName,
-        loggedInEmail,
-        selectedOptions,
-        timeSpentPerQuestion,
-      },
-    });
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_assessment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(completeFeedback),
+      });
+      const data = await response.json();
+      const marksScored = data.marks_scored;
+      const totalMarks = data.total_marks;
+      const marks = [marksScored, totalMarks, formatTime(overallTimer)];
+      localStorage.clear();
+      navigate('/AssessmentDone', { state: { questions: questionsData, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion,feedback1 } });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  // Hover behavior for emoji feedback
   const handleMouseEnter1 = () => {
     setIsHovering1(true);
   };
+
   const handleMouseLeave1 = () => {
     setIsHovering1(false);
   };
-  const handleHover = (index) => () => {
-    setHoveredEmoji(meanings[index]);
-  };
-  const handleMouseOut = () => {
-    setHoveredEmoji(null);
-  };
 
-  // Track how much time each question gets
   useEffect(() => {
     timerIntervalId = setInterval(() => {
       setTimeSpentPerQuestion(prevTimeSpent => {
@@ -199,10 +178,19 @@ const AssessmentPage = () => {
     };
   }, [currentQuestion]);
 
-  // Jump to a question directly
   const handleDirectNavigation = (questionIndex) => {
     clearInterval(timerIntervals[currentQuestion]);
     setCurrentQuestion(questionIndex);
+  };
+
+  const [hoveredEmoji, setHoveredEmoji] = useState(null);
+
+  const handleHover = (index) => {
+    return () => setHoveredEmoji(meanings[index]);
+  };
+
+  const handleMouseOut = () => {
+    setHoveredEmoji(null);
   };
 
   return (
@@ -213,36 +201,18 @@ const AssessmentPage = () => {
         <>
           <UpperNav name={loggedInName} email={loggedInEmail} />
           <div className="p-4">
-            {/* Top navigation for questions + overall timer */}
             <div className="navigation-bar mb-4">
-              <div
-                className="mb-2 border border-green-200 rounded-lg shadow-md pt-2 pl-2 relative hover:shadow-lg transition duration-300"
-                style={{ width: '20%', marginLeft: '10px' }}
-              >
-                <div className="mb-4 text-gray-800">
-                  Overall Timer: {formatTime(overallTimer)}
-                </div>
+              <div className="mb-2 border border-green-200 rounded-lg shadow-md pt-2 pl-2 relative hover:shadow-lg transition duration-300" style={{ width: '20%', marginLeft: '10px' }}>
+                <div className="mb-4 text-gray-800">Overall Timer: {formatTime(overallTimer)}</div>
               </div>
-
-              {/* Buttons for each question */}
               {questionsData.map((_, index) => (
                 <button
                   key={index}
-                  className={`nav-button ${index === currentQuestion ? 'active' : ''} ${
-                    selectedOptions[index] !== null ? 'answered' : 'unanswered'
-                  }`}
+                  className={`nav-button ${index === currentQuestion ? 'active' : ''} ${selectedOptions[index] !== null ? 'answered' : 'unanswered'}`}
                   onClick={() => handleDirectNavigation(index)}
                   style={{
-                    backgroundColor:
-                      index === currentQuestion
-                        ? '#4CAF50'
-                        : selectedOptions[index] !== null
-                        ? '#2196F3'
-                        : '#ddd',
-                    color:
-                      index === currentQuestion || selectedOptions[index] !== null
-                        ? 'white'
-                        : 'black',
+                    backgroundColor: index === currentQuestion ? '#4CAF50' : selectedOptions[index] !== null ? '#2196F3' : '#ddd',
+                    color: index === currentQuestion ? 'white' : selectedOptions[index] !== null ? 'white' : 'black',
                     border: 'none',
                     borderRadius: '5px',
                     padding: '10px 20px',
@@ -263,58 +233,33 @@ const AssessmentPage = () => {
               ))}
             </div>
 
-            {/* Render each question (only show current question) */}
             {questionsData.map((questionObj, questionIndex) => (
-              <div
-                key={questionIndex}
-                className={`bg-gray-200 p-4 rounded shadow ${
-                  questionIndex === currentQuestion ? 'block' : 'hidden'
-                }`}
-              >
-                {/* Question text */}
-                <h2 className="text-2xl font-bold mb-4">
-                  Q{questionIndex + 1}:{' '}
-                  {questionObj.question.split('\n').map((textChunk, index) => (
-                    <span key={index}>
-                      {textChunk}
-                      <br />
-                    </span>
-                  ))}
-                </h2>
+              <div key={questionIndex} className={`bg-gray-200 p-4 rounded shadow ${questionIndex === currentQuestion ? 'block' : 'hidden'}`}>
+                {/* Render question first */}
+                <h2 className="text-2xl font-bold mb-4">Q{questionIndex + 1}: {questionObj.question.split('\n').map((textChunk, index) => (<span key={index}>{textChunk}<br /></span>))}</h2>
 
-                {/* Possible images under the question */}
+                {/* Render image below the question */}
                 {questionObj.images?.map((image, imgIndex) => (
                   <SvgDisplay key={imgIndex} svgContent={image} />
                 ))}
 
-                {/* Options (radio) */}
+                {/* Render options below the image */}
                 <ul className="list-none">
                   {questionObj.options.map((option, optionIndex) => (
-                    <div
-                      key={optionIndex}
-                      className="flex items-center mb-2 cursor-pointer"
-                      onClick={() => handleOptionSelect(questionIndex, optionIndex)}
-                    >
+                    <div key={optionIndex} className="flex items-center mb-2 cursor-pointer" onClick={() => handleOptionSelect(questionIndex, optionIndex)}>
                       <input
                         type="radio"
                         name={`question-${questionIndex}`}
                         checked={selectedOptions[questionIndex] === optionIndex}
                         className="mr-2"
                       />
-                      <div
-                        className={`list-disc ml-4 ${
-                          selectedOptions[questionIndex] === optionIndex
-                            ? 'text-blue-500 font-bold'
-                            : ''
-                        }`}
-                      >
+                      <div className={`list-disc ml-4 ${selectedOptions[questionIndex] === optionIndex ? 'text-blue-500 font-bold' : ''}`}>
                         {option}
                       </div>
                     </div>
                   ))}
                 </ul>
 
-                {/* Prev / Next buttons */}
                 <div className="mb-5 ml-5 mr-5 mt-4 flex justify-between">
                   <button
                     className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -331,24 +276,13 @@ const AssessmentPage = () => {
                     Next
                   </button>
                 </div>
-
-                {/* Time spent on this question + Rate This? */}
-                <div className="flex">
-                  <div
-                    className="mr-2 border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300"
-                    style={{ width: '20%' }}
-                  >
+                <div className='flex'>
+                  <div className="mr-2 border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300" style={{ width: '20%' }}>
                     <div className="mb-4 text-black-800 font-bold">
-                      Time Spent on this question:{' '}
-                      {formatTime(timeSpentPerQuestion[questionIndex])}
+                      Time Spent on this question: {formatTime(timeSpentPerQuestion[questionIndex])}
                     </div>
                   </div>
-                  <div
-                    className="border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300"
-                    style={{ width: '20%' }}
-                    onMouseEnter={handleMouseEnter1}
-                    onMouseLeave={handleMouseLeave1}
-                  >
+                  <div className="border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300" style={{ width: '20%' }} onMouseEnter={handleMouseEnter1} onMouseLeave={handleMouseLeave1}>
                     <div className="mb-4 text-blue-800">
                       Rate this?
                       {isHovering1 && (
@@ -377,8 +311,6 @@ const AssessmentPage = () => {
                 </div>
               </div>
             ))}
-
-            {/* Final Submit button */}
             <div className="mt-6 flex justify-center">
               <button
                 onClick={handleSubmit}
