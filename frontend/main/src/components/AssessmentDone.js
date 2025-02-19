@@ -7,12 +7,13 @@ import UpperNav from './UpperNav';
 const AssessmentDone = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const { questions, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion } = useLocation().state;
+    const { questions, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion,feedback1 } = useLocation().state;
     const marksScored = marks[0];
     const totalMarks = marks[1];
     const seconds = marks[2];
     const percentage1 = (marksScored / totalMarks) * 100;
     const percentage = percentage1.toFixed(2);
+    console.log("feedback1",feedback1)
 
 
     const generatePDF = () => {
@@ -166,12 +167,13 @@ const AssessmentDone = () => {
     const saveAssessmentData = async () => {
         const data = {
             questions,
+            feedback1,
             marks,
             seconds,
             selectedOpt,
-            timeSpentPerQuestion: convertedTimeSpentPerQuestion, 
+            timeSpentPerQuestion: convertedTimeSpentPerQuestion,
         };
-
+    
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/save-assessment`, {
                 method: 'POST',
@@ -180,9 +182,10 @@ const AssessmentDone = () => {
                 },
                 body: JSON.stringify(data),
             });
-
+    
             if (response.ok) {
-                const result = await response.json();
+                const text = await response.text();
+                const result = text ? JSON.parse(text) : {};
                 console.log('Data saved:', result);
             } else {
                 console.error('Failed to save data:', response.statusText);
@@ -191,14 +194,17 @@ const AssessmentDone = () => {
             console.error('Error saving data:', error);
         }
     };
-
+    
     useEffect(() => {
-        setTimeout(() => {
-            setLoading(false);
-        }, 3000);
-
-        saveAssessmentData(); // Trigger data save when the component mounts
+        // Trigger data save when the component mounts
+        const saveData = async () => {
+            await saveAssessmentData();
+        };
+    
+        setTimeout(() => setLoading(false), 3000); // Set loading state to false after 3 seconds
+        saveData(); // Trigger data saving asynchronously
     }, []);
+    
 
     return (
         <div>
