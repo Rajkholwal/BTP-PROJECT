@@ -3,12 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingAssessment from './LoadingAssessment';
 import UpperNav from './UpperNav';
 import SvgDisplay from './SvgDisplay';
-
+import { useSelector } from "react-redux";
 const emojis = ['😁', '😖', '⏲️', '😢', '❓'];
 const meanings = ['Easy', 'Difficult', 'Time consuming', 'Out of Scope', 'Ambiguous'];
 
 const AssessmentPage = () => {
   const navigate = useNavigate();
+  const currentUser = useSelector((state) => state.user.currentUser.user);
   const [loading, setLoading] = useState(true);
   const [questionsData, setQuestionsData] = useState([]);
   const { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } = useLocation().state;
@@ -19,13 +20,13 @@ const AssessmentPage = () => {
   const [overallTimer, setOverallTimer] = useState(0);
   const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState(Array(parseInt(numQuestions)).fill(0));
   const [timerIntervals, setTimerIntervals] = useState([]);
-  const sliderRef = useRef(null);
+  // const sliderRef = useRef(null);
   const [isHovering1, setIsHovering1] = useState(false);
   let timerIntervalId;
   useEffect(() => {
     const fetchQuestionData = async () => {
-      if (localStorage.getItem("questionsFetched")) {
-        setQuestionsData(JSON.parse(localStorage.getItem("questionsFetched")));
+      if (localStorage.getItem('questionsFetched')) {
+        setQuestionsData(JSON.parse(localStorage.getItem('questionsFetched')));
         setLoading(false);
         return;
       }
@@ -56,7 +57,7 @@ const AssessmentPage = () => {
       }
     };
     fetchQuestionData();
-  }, [numQuestions, selectedLevel, selectedTags]);
+  }, [numQuestions, selectedLevel, selectedTags, timeSpentPerQuestion]);
 
   useEffect(() => {
     const overallTimerInterval = setInterval(() => {
@@ -67,7 +68,7 @@ const AssessmentPage = () => {
   }, []);
 
   useEffect(() => {
-    const intervals = questionsData.map((_, index) => null);
+    const intervals = questionsData.map(() => null);
     setTimerIntervals(intervals);
   }, [questionsData]);
 
@@ -101,60 +102,77 @@ const AssessmentPage = () => {
 
   const handleSubmit = async () => {
     clearInterval(timerIntervalId);
+
     if (selectedOptions.includes(null)) {
-      alert("Please answer all questions before submitting.");
-      return;
+        alert("Please answer all questions before submitting.");
+        return;
     }
     if (Object.keys(feedback1).length !== questionsData.length) {
-      alert("Please provide feedback for all questions before submitting.");
-      return;
+        alert("Please provide feedback for all questions before submitting.");
+        return;
     }
+
     const completeFeedback = {
-      selectedOptions: selectedOptions,
-      correctOptions: {},
-      feedback1: feedback1,
-      name: loggedInName,
-      email: loggedInEmail,
-      type: loggedInType,
-      questionBodies: questionsData,
-      timeTaken: overallTimer,
-      individualTimeTaken: timeSpentPerQuestion
+        selectedOptions: selectedOptions,
+        correctOptions: {},  // To be filled
+        feedback1: feedback1,
+        name: loggedInName,
+        email: loggedInEmail,
+        type: loggedInType,
+        questionBodies: questionsData,
+        timeTaken: overallTimer,
+        individualTimeTaken: timeSpentPerQuestion
     };
 
+    let totalMarks = questionsData.length;
+    let marksScored = 0;
+
+    // Compute correct options and score
     questionsData.forEach((question, index) => {
-      // if (question.answer[0][0] === 'A') {
-      //   completeFeedback.correctOptions[index.toString()] = "0";
-      // } else if (question.answer[0][0] === 'B') {
-      //   completeFeedback.correctOptions[index.toString()] = "1";
-      // } else if (question.answer[0][0] === 'C') {
-      //   completeFeedback.correctOptions[index.toString()] = "2";
-      // } else {
-      //   completeFeedback.correctOptions[index.toString()] = "3";
-      // }
-      for(let i=0; i<question.options.length; i++){
-        if (question.options[i] === question.answer)
-          completeFeedback.correctOptions[index] = i;
-      }
+        const correctIndex = question.options.indexOf(question.answer);
+        completeFeedback.correctOptions[index] = correctIndex; // Store correct option index
+
+        if (selectedOptions[index] !== null && selectedOptions[index] === correctIndex) {
+            marksScored++;
+        }
     });
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/submit_assessment`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(completeFeedback),
-      });
-      const data = await response.json();
-      const marksScored = data.marks_scored;
-      const totalMarks = data.total_marks;
-      const marks = [marksScored, totalMarks, formatTime(overallTimer)];
-      localStorage.clear();
-      navigate('/AssessmentDone', { state: { questions: questionsData, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion,feedback1 } });
+        await fetch(`${process.env.REACT_APP_API_URL}/submit_user_assessment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: currentUser?.email,  // Ensure `currentUser` exists
+                assessments: completeFeedback
+            }),
+        });
+
     } catch (error) {
-      console.error(error);
+        console.error(error);
     }
-  };
+
+    // Prepare results data
+    const completeTime = formatTime(overallTimer);
+    const marksInfo = [marksScored, totalMarks, completeTime];
+
+    // Clear local storage
+    localStorage.clear();
+
+    // Navigate to results page
+    navigate('/AssessmentDone', {
+        state: {
+            questions: questionsData,
+            marks: marksInfo,
+            loggedInName,
+            loggedInEmail,
+            selectedOptions,
+            timeSpentPerQuestion,
+            feedback1
+        },
+    });
+};
+
+
 
   const handleMouseEnter1 = () => {
     setIsHovering1(true);
@@ -199,7 +217,7 @@ const AssessmentPage = () => {
         <LoadingAssessment />
       ) : (
         <>
-          <UpperNav name={loggedInName} email={loggedInEmail} />
+          {/* <UpperNav name={loggedInName} email={loggedInEmail} /> */}
           <div className="p-4">
             <div className="navigation-bar mb-4">
               <div className="mb-2 border border-green-200 rounded-lg shadow-md pt-2 pl-2 relative hover:shadow-lg transition duration-300" style={{ width: '20%', marginLeft: '10px' }}>
