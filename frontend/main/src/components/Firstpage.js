@@ -72,7 +72,7 @@ const Firstpage = () => {
                             {isLoggedIn ? (
                                 <div>
                                     {/* Content for authenticated users */}
-                                    <UpperNav name={loggedInName} email={loggedInEmail} />
+                                    {/* <UpperNav name={loggedInName} email={loggedInEmail} /> */}
                                     <div className='relative isolate px-60 lg:px-8'>
                                         <div class="mt-5">
                                             <div class="hidden sm:flex sm:justify-center">
