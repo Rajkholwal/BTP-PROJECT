@@ -160,12 +160,16 @@ import os
 import io
 from generateAssessment import generateAssessment
 
+from datetime import datetime
+
 
 # MongoDB Connection
 from pymongo import MongoClient
-client = MongoClient('mongodb+srv://kumarchspiyush:nGyCgIRvLThU73ix@cluster0.fdcer.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')  # Replace with your MongoDB URI if not localhost
+client = MongoClient('mongodb+srv://kumarchspiyush:nGyCgIRvLThU73ix@cluster0.fdcer.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0') 
 db = client['quizApp']  # Database name
 collection = db['quizResults']  # Collection name
+users_collection = db['users']  # Collection to store user data
+assessments_collection = db['assessments'] 
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -240,8 +244,114 @@ def save_assessment():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/auth/google', methods=['POST'])
+def google_auth():
+    try:
+        data = request.json
+        name = data.get("name")
+        email = data.get("email")
+        googlePhotoUrl = data.get("googlePhotoUrl")
+
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
+        # Check if user already exists
+        existing_user = users_collection.find_one({"email": email})
+        if existing_user:
+            users_collection.update_one({"email": email}, {"$set": {"name": name, "googlePhotoUrl": googlePhotoUrl}})
+        else:
+            users_collection.insert_one({"name": name, "email": email, "googlePhotoUrl": googlePhotoUrl})
+
+        return jsonify({"message": "User saved successfully", "user": {"name": name, "email": email, "googlePhotoUrl": googlePhotoUrl}}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
+
+
+@app.route('/submit_user_assessment', methods=['POST'])
+def submit_user_assessment():
+    data = request.json
+    print('Received assessment data:', data)
+
+    email = data.get('email')
+    if not email:
+        return jsonify({"status": "error", "message": "User email is required"}), 400
+
+    assessment_data = data.get("assessments", {})
+
+    formatted_questions = []
+    for i, q in enumerate(assessment_data.get("questionBodies", [])):
+        selected_index = assessment_data["selectedOptions"][i] if i < len(assessment_data["selectedOptions"]) else None
+        selected_option = q["options"][selected_index] if isinstance(selected_index, int) and 0 <= selected_index < len(q["options"]) else "Not answered"
+
+        formatted_questions.append({
+            "question": q["question"],
+            "options": q["options"],
+            "answer": q["options"][assessment_data["correctOptions"].get(str(i), -1)] if str(i) in assessment_data["correctOptions"] else "Unknown",
+            "selectedOption": selected_option,
+            "timeSpent": assessment_data.get("individualTimeTaken", [])[i] if i < len(assessment_data.get("individualTimeTaken", [])) else 0,
+            "images": q.get("images", [])
+        })
+
+    assessment_entry = {
+        "questions": formatted_questions,
+        "submittedAt": datetime.utcnow()
+    }
+
+    print("Processed assessment entry:", assessment_entry)
+
+    try:
+        assessments_collection.update_one(
+            {"email": email},
+            {"$push": {"assessments": assessment_entry}},
+            upsert=True
+        )
+
+        return jsonify({"status": "success", "message": "User assessment saved successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+
+
+
+@app.route('/get_assessments/<email>', methods=['GET'])
+def get_assessments(email):
+    try:
+        user_data = assessments_collection.find_one({"email": email}, {"_id": 0, "assessments": 1})
+
+        if not user_data or "assessments" not in user_data:
+            return jsonify([]), 200  # Return an empty list if no assessments are found
+
+        assessments = []
+        for i, assess in enumerate(user_data["assessments"]):
+            total_questions = len(assess.get("selectedOptions", []))
+            correct_answers = sum(
+                1 for j in range(total_questions)
+                if assess["selectedOptions"][j] == assess["correctOptions"].get(j, -1)  # Fix here
+            ) if total_questions else 0
+
+            assessment_data = {
+                "title": assess.get("title", f"Assessment {i + 1}"),
+                "score": round(100 * correct_answers / total_questions, 2) if total_questions else 0,
+                "date": assess.get("submittedAt").strftime("%Y-%m-%d %H:%M:%S") if isinstance(assess.get("submittedAt"), datetime) else "Unknown",
+                "questions": assess.get("questions", []),
+                "selectedOptions": assess.get("selectedOptions", []),
+                "correctOptions": assess.get("correctOptions", {}),
+                "individualTimeTaken": assess.get("individualTimeTaken", []),
+                "options": assess.get("options", [])  # Ensure this is a **list of lists** if needed
+            }
+            assessments.append(assessment_data)
+
+        return jsonify(assessments), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
