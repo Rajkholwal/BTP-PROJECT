@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 const ReviewAssessment = () => {
     const { state } = useLocation();
     const { questions, selectedOptions, timeSpentPerQuestion } = state;
+    console.log("review",questions);
     const navigate = useNavigate();
 
     return (
