@@ -30,6 +30,10 @@ const QuizForm = (props) => {
     if(inputValue > 50){
       inputValue = 50;
     }
+    else if(inputValue<0)
+    {
+      inputValue = 1;
+    }
     setNumQuestions(inputValue);
   };
 
