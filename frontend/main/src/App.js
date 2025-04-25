@@ -64,7 +64,7 @@ function App() {
           </>
 
         } />
-        <Route element={<PrivateRoute />}>
+        {/* <Route element={<PrivateRoute />}> */}
 
           <Route path='/AssessmentPage' index element={
             <>
@@ -83,7 +83,7 @@ function App() {
             </>
 
           } />
-        </Route>
+        {/* </Route> */}
 
 
       </Routes>
