@@ -9,7 +9,8 @@ const meanings = ['Easy', 'Difficult', 'Time consuming', 'Out of Scope', 'Ambigu
 
 const AssessmentPage = () => {
   const navigate = useNavigate();
-  const currentUser = useSelector((state) => state.user.currentUser.user);
+  // const currentUser = useSelector((state) => state.user.currentUser.user);
+  
   const [loading, setLoading] = useState(true);
   const [questionsData, setQuestionsData] = useState([]);
   const { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } = useLocation().state;
@@ -137,19 +138,19 @@ const AssessmentPage = () => {
         }
     });
 
-    try {
-        await fetch(`${process.env.REACT_APP_API_URL}/submit_user_assessment`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: currentUser?.email,  // Ensure `currentUser` exists
-                assessments: completeFeedback
-            }),
-        });
+    // try {
+    //     await fetch(`${process.env.REACT_APP_API_URL}/submit_user_assessment`, {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({
+    //             email: currentUser?.email,  // Ensure `currentUser` exists
+    //             assessments: completeFeedback
+    //         }),
+    //     });
 
-    } catch (error) {
-        console.error(error);
-    }
+    // } catch (error) {
+    //     console.error(error);
+    // }
 
     // Prepare results data
     const completeTime = formatTime(overallTimer);
