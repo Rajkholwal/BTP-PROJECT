@@ -2,18 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import LoadingResult from './LoadingResult';
-import UpperNav from './UpperNav';
 
 const AssessmentDone = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const { questions, marks, loggedInName, loggedInEmail,selectedOptions,timeSpentPerQuestion,feedback1 } = useLocation().state;
+    const { questions, marks, selectedOptions, timeSpentPerQuestion, feedback1 } = useLocation().state;
     const marksScored = marks[0];
     const totalMarks = marks[1];
     const seconds = marks[2];
     const answeredCount = selectedOptions?.filter((x) => x !== null && x !== undefined).length ?? 0;
-    const percentage1 = (marksScored / totalMarks) * 100;
-    const percentage = percentage1.toFixed(2);
     console.log("feedback1",feedback1)
 
 
@@ -165,46 +162,41 @@ const AssessmentDone = () => {
 
         selectedOption: question.options[selectedOptions[index]] || 'Not answered',
     }));
-    const saveAssessmentData = async () => {
-        const data = {
-            questions,
-            feedback1,
-            marks,
-            seconds,
-            selectedOpt,
-            timeSpentPerQuestion: convertedTimeSpentPerQuestion,
-        };
-    
-        try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/save-assessment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-    
-            if (response.ok) {
-                const text = await response.text();
-                const result = text ? JSON.parse(text) : {};
-                console.log('Data saved:', result);
-            } else {
-                console.error('Failed to save data:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error saving data:', error);
-        }
-    };
-    
     useEffect(() => {
-        // Trigger data save when the component mounts
-        const saveData = async () => {
-            await saveAssessmentData();
+        const saveAssessmentData = async () => {
+            const data = {
+                questions,
+                feedback1,
+                marks,
+                seconds,
+                selectedOpt,
+                timeSpentPerQuestion: convertedTimeSpentPerQuestion,
+            };
+        
+            try {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/save-assessment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+        
+                if (response.ok) {
+                    const text = await response.text();
+                    const result = text ? JSON.parse(text) : {};
+                    console.log('Data saved:', result);
+                } else {
+                    console.error('Failed to save data:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
         };
-    
-        setTimeout(() => setLoading(false), 3000); // Set loading state to false after 3 seconds
-        saveData(); // Trigger data saving asynchronously
-    }, []);
+
+        setTimeout(() => setLoading(false), 3000);
+        saveAssessmentData();
+    }, [convertedTimeSpentPerQuestion, feedback1, marks, questions, seconds, selectedOpt]);
     
 
     return (

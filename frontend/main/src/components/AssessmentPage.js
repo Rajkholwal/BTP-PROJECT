@@ -1,9 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingAssessment from './LoadingAssessment';
-import UpperNav from './UpperNav';
 import SvgDisplay from './SvgDisplay';
-import { useSelector } from "react-redux";
 
 const AssessmentPage = () => {
   const navigate = useNavigate();
@@ -13,7 +11,6 @@ const AssessmentPage = () => {
   const [questionsData, setQuestionsData] = useState([]);
   const { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } = useLocation().state;
   const [selectedOptions, setSelectedOptions] = useState(Array(numQuestions).fill(null));
-  const [seconds, setSeconds] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [overallTimer, setOverallTimer] = useState(0);
   const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState(Array(parseInt(numQuestions)).fill(0));
@@ -22,8 +19,7 @@ const AssessmentPage = () => {
   const [markedForReview, setMarkedForReview] = useState(() => Array(parseInt(numQuestions)).fill(false));
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [submitConfirmed, setSubmitConfirmed] = useState(false);
-  // const sliderRef = useRef(null);
-  let timerIntervalId;
+  const timerIntervalIdRef = useRef(null);
   useEffect(() => {
     const fetchQuestionData = async () => {
       if (localStorage.getItem('questionsFetched')) {
@@ -133,7 +129,7 @@ const AssessmentPage = () => {
   }, [markedForReview, questionsData.length, selectedOptions, visited]);
 
   const handleSubmit = async () => {
-    clearInterval(timerIntervalId);
+    if (timerIntervalIdRef.current) clearInterval(timerIntervalIdRef.current);
 
     const completeFeedback = {
         selectedOptions: selectedOptions,
@@ -198,7 +194,7 @@ const AssessmentPage = () => {
 
 
   useEffect(() => {
-    timerIntervalId = setInterval(() => {
+    timerIntervalIdRef.current = setInterval(() => {
       setTimeSpentPerQuestion(prevTimeSpent => {
         const updatedTimeSpent = [...prevTimeSpent];
         updatedTimeSpent[currentQuestion] += 1000;
@@ -207,7 +203,7 @@ const AssessmentPage = () => {
     }, 1000);
 
     return () => {
-      clearInterval(timerIntervalId);
+      if (timerIntervalIdRef.current) clearInterval(timerIntervalIdRef.current);
     };
   }, [currentQuestion]);
 
