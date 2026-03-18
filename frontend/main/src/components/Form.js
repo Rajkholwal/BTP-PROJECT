@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UpperNav from './UpperNav';
 
 const QuizForm = (props) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [numQuestions, setNumQuestions] = useState('');
-  const [generated, setgenerated] = useState(0)
   const {loggedInName,loggedInEmail,loggedInType} = props
 
   const navigate = useNavigate()
@@ -63,7 +60,6 @@ const QuizForm = (props) => {
       // Handle the response as needed
       if (response.ok) {
         alert('Quiz submitted successfully!');
-        setgenerated(0)
       } else {
         console.error('Failed to submit quiz.');
         console.log(response.statusText)
@@ -76,11 +72,6 @@ const QuizForm = (props) => {
   const handleStartAssessment = async (event) => {
     // Create payload to send to the server
     console.log(loggedInName)
-    const payload = {
-      tags: selectedTags,
-      level: selectedLevel,
-      numQuestions: numQuestions,
-    };
     try {
       navigate('/AssessmentPage', { state: { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } })
     } catch (error) {

@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { signOut } from "./redux/userSlice";
 
 const UpperNav = (props) => {
-    const { name } = props;
     const dispatch = useDispatch();
     const currentUser = useSelector((state) => state.user.currentUser);
     const [dropdownOpen, setDropdownOpen] = useState(false);

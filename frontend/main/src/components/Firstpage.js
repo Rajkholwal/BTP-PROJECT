@@ -1,25 +1,20 @@
 import React from 'react'
 // import { GoogleLogin, GoogleLogout } from 'react-google-login';
 import { useState } from 'react';
-import UpperNav from './UpperNav';
 import QuizForm from './Form';
 import { useEffect } from 'react';
 import Loading from './Loading';
 import './OptionSelector.css';
 import engineeringStudentImage from './Student_engineering.png'
-import nonEngineeringStudentImage from './Student.webp';
 import facultyImage from './Faculty.jpg';
-import industryPersonImage from './Industry.jpg';
 import './Firstpage.css'
 
-const clientId = '1099148463228-fniq392tv0qv5hlbm084r9m8tp8ph0ls.apps.googleusercontent.com';
 const Firstpage = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loggedInName, setLoggedInName] = useState('')
     const [loggedInEmail, setLoggedInEmail] = useState('')
     const [loading, setLoading] = useState(true)
     const [selectedOption, setSelectedOption] = useState(null);
-    const [clickedImage, setClickedImage] = useState(0);
     const feedbackFormLink = "https://docs.google.com/forms/d/1olMjHfmbrhPrhjl35su0kN_OX600hA60nAxo1-BEvlk/edit";
     // const onSuccessLogin = (res) => {
     //     console.log("Login Success current user:")
@@ -41,9 +36,6 @@ const Firstpage = () => {
     // }
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
-        if (option === 'student-non-engneering') {
-            setClickedImage(1);
-        }
     };
     const handleGo = () => {
         if (selectedOption == null) {
