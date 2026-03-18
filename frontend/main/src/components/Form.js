@@ -89,33 +89,46 @@ const QuizForm = (props) => {
 
   }
 
-  const tags = ['Number-System', 'Boolean-algebra'];
+  const tags = [
+    'Number-System',
+    'Boolean-algebra',
+    'Logic-Gates',
+    'Flip-flops',
+    'SequenceDetector',
+    'Truth-Tables',
+    'State-Machine',
+    'State-Table',
+  ];
   const levels = ['Easy', 'Medium'];
 
   return (
-    <div>
-      <div class="relative isolate px-6 lg:px-8">
-        <div class="mt-5">
-          <div class="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div class="relative rounded-full px-3 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-              More about out plan:   <a href="#" class="font-semibold text-indigo-600"><span class="absolute inset-0" aria-hidden="true"></span>Read more <span aria-hidden="true">&rarr;</span></a>
-            </div>
+    <div className="px-6 lg:px-8">
+      <div className="mx-auto mt-10 max-w-6xl">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Digital Logic Design Quiz Generator
+            </h1>
+            <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">
+              Choose modules, difficulty, and number of questions for your assessment.
+            </p>
           </div>
-          <div class="text-center">
-            <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">Digital Logic Design Quiz generator</h1>
-            <p class="mt-6 text-lg leading-8 text-gray-600">Fill details about the tags you want to include along with the level and number of questions you want to generate in your quiz.</p>
-            <div className="p-10">
-              <h2 className="text-xl font-bold mb-4">Quiz Configuration</h2>
-              <div className="space-y-4">
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <div className="space-y-6">
                 {/* Tag Selector */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Select Tags</h3>
-                  <div className="space-x-2">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Select Modules</h3>
+                  <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (
                       <span
                         key={tag}
-                        className={`inline-block px-3 py-1 text-sm font-semibold rounded-full cursor-pointer ${selectedTags.includes(tag) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                          }`}
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold cursor-pointer border transition ${
+                          selectedTags.includes(tag)
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'bg-white text-slate-700 border-gray-300 hover:bg-gray-50'
+                        }`}
                         onClick={() => handleTagClick(tag)}
                       >
                         {tag}
@@ -126,13 +139,16 @@ const QuizForm = (props) => {
 
                 {/* Level Selector */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Select Level</h3>
-                  <div className="space-x-2">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">Select Difficulty</h3>
+                  <div className="flex flex-wrap gap-2">
                     {levels.map((level) => (
                       <span
                         key={level}
-                        className={`inline-block px-3 py-1 text-sm font-semibold rounded-full cursor-pointer ${selectedLevel === level ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                          }`}
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold cursor-pointer border transition ${
+                          selectedLevel === level
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'bg-white text-slate-700 border-gray-300 hover:bg-gray-50'
+                        }`}
                         onClick={() => handleLevelClick(level)}
                       >
                         {level}
@@ -143,44 +159,50 @@ const QuizForm = (props) => {
 
                 {/* Question Input */}
                 <div>
-                  <h3 className="text-lg font-semibold">Enter Number of Questions</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Number of Questions</h3>
                   
-                  <form className="display-flex mb-2">
-                    <label htmlFor="numQuestionsInput" className="text-gray-700 pr-2 ">
+                  <form className="mt-3 flex items-center gap-3">
+                    <label htmlFor="numQuestionsInput" className="text-slate-700">
                       Questions:
                     </label>
                     <input
                       type="number"
                       id="numQuestionsInput"
-                      className=" p-2 border rounded-md"
+                      className="w-32 rounded-md border border-gray-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20"
                       value={numQuestions}
                       onChange={handleInputChange}
                     />
                   </form>
-                  <h4 className="mb-2">(maximum 50 questions are allowed per assessment)</h4>
+                  <div className="mt-2 text-sm text-slate-500">(maximum 50 questions allowed)</div>
                 </div>
               </div>
 
               {/* Submit Button */}
-              <div className="mt-4">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <button
                   onClick={handleGeneratePdf}
-                  className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
                 >
                   Generate PDF
                 </button>
                 <button
                   onClick={handleStartAssessment}
-                  className="ml-8 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                  className="rounded-md bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500"
                 >
                   Start Assessment
                 </button>
               </div>
             </div>
+
+            <aside className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+              <div className="text-sm font-semibold text-slate-900">Tips</div>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600">
+                <li>- Select multiple modules to mix question types.</li>
+                <li>- Pick difficulty first for better distribution.</li>
+                <li>- Start with 10–20 questions for fastest results.</li>
+              </ul>
+            </aside>
           </div>
-        </div>
-        <div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
-          <div class="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
         </div>
       </div>
     </div>

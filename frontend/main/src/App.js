@@ -34,9 +34,10 @@ function App() {
 
   return (
     <>
-    <BrowserRouter>
-     <UpperNav/>
-      <Routes>
+    <div className="min-h-screen bg-gray-100 text-slate-900">
+      <BrowserRouter>
+        <UpperNav/>
+        <Routes>
         <Route path='/' index element={
           <>
             <Firstpage />
@@ -88,6 +89,7 @@ function App() {
 
       </Routes>
       </BrowserRouter>
+    </div>
     </>
   );
 }

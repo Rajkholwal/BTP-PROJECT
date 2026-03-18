@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LoadingAssessment from './LoadingAssessment';
 import UpperNav from './UpperNav';
 import SvgDisplay from './SvgDisplay';
 import { useSelector } from "react-redux";
-const emojis = ['😁', '😖', '⏲️', '😢', '❓'];
-const meanings = ['Easy', 'Difficult', 'Time consuming', 'Out of Scope', 'Ambiguous'];
 
 const AssessmentPage = () => {
   const navigate = useNavigate();
@@ -15,14 +13,16 @@ const AssessmentPage = () => {
   const [questionsData, setQuestionsData] = useState([]);
   const { numQuestions, selectedTags, selectedLevel, loggedInName, loggedInEmail, loggedInType } = useLocation().state;
   const [selectedOptions, setSelectedOptions] = useState(Array(numQuestions).fill(null));
-  const [feedback1, setFeedback1] = useState({});
   const [seconds, setSeconds] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [overallTimer, setOverallTimer] = useState(0);
   const [timeSpentPerQuestion, setTimeSpentPerQuestion] = useState(Array(parseInt(numQuestions)).fill(0));
   const [timerIntervals, setTimerIntervals] = useState([]);
+  const [visited, setVisited] = useState(() => Array(parseInt(numQuestions)).fill(false));
+  const [markedForReview, setMarkedForReview] = useState(() => Array(parseInt(numQuestions)).fill(false));
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [submitConfirmed, setSubmitConfirmed] = useState(false);
   // const sliderRef = useRef(null);
-  const [isHovering1, setIsHovering1] = useState(false);
   let timerIntervalId;
   useEffect(() => {
     const fetchQuestionData = async () => {
@@ -46,9 +46,8 @@ const AssessmentPage = () => {
         });
         const data = await response.json();
         setQuestionsData(data.questions);
-        for (let i = 0; i < data.questions.length; i++) {
-          timeSpentPerQuestion[i] = 0;
-        }
+        setVisited(Array(data.questions.length).fill(false));
+        setMarkedForReview(Array(data.questions.length).fill(false));
         setLoading(false);
         localStorage.setItem("questionsFetched", JSON.stringify(data.questions));
 
@@ -86,11 +85,12 @@ const AssessmentPage = () => {
     setSelectedOptions(newSelectedOptions);
   };
 
-  const handleFeedbackChange1 = (questionIndex, feedbackType) => {
-    setFeedback1(prevFeedback => ({
-      ...prevFeedback,
-      [questionIndex]: feedbackType,
-    }));
+  const handleToggleMarkForReview = () => {
+    setMarkedForReview(prev => {
+      const next = [...prev];
+      next[currentQuestion] = !next[currentQuestion];
+      return next;
+    });
   };
 
   const handlePrev = () => {
@@ -101,22 +101,43 @@ const AssessmentPage = () => {
     setCurrentQuestion(prevQuestion => Math.min(questionsData.length - 1, prevQuestion + 1));
   };
 
+  useEffect(() => {
+    setVisited(prev => {
+      if (!questionsData.length) return prev;
+      const next = [...prev];
+      next[currentQuestion] = true;
+      return next;
+    });
+  }, [currentQuestion, questionsData.length]);
+
+  const statusCounts = useMemo(() => {
+    const total = questionsData.length;
+    let notVisited = 0;
+    let notAnswered = 0;
+    let answered = 0;
+    let marked = 0;
+
+    for (let i = 0; i < total; i++) {
+      const isVisited = !!visited[i];
+      const isAnswered = selectedOptions[i] !== null && selectedOptions[i] !== undefined;
+      const isMarked = !!markedForReview[i];
+
+      if (!isVisited) notVisited++;
+      if (isMarked) marked++;
+
+      if (isVisited && !isAnswered) notAnswered++;
+      if (isAnswered) answered++;
+    }
+
+    return { total, notVisited, notAnswered, answered, marked };
+  }, [markedForReview, questionsData.length, selectedOptions, visited]);
+
   const handleSubmit = async () => {
     clearInterval(timerIntervalId);
-
-    if (selectedOptions.includes(null)) {
-        alert("Please answer all questions before submitting.");
-        return;
-    }
-    if (Object.keys(feedback1).length !== questionsData.length) {
-        alert("Please provide feedback for all questions before submitting.");
-        return;
-    }
 
     const completeFeedback = {
         selectedOptions: selectedOptions,
         correctOptions: {},  // To be filled
-        feedback1: feedback1,
         name: loggedInName,
         email: loggedInEmail,
         type: loggedInType,
@@ -168,20 +189,13 @@ const AssessmentPage = () => {
             loggedInEmail,
             selectedOptions,
             timeSpentPerQuestion,
-            feedback1
+            markedForReview,
+            visited,
         },
     });
 };
 
 
-
-  const handleMouseEnter1 = () => {
-    setIsHovering1(true);
-  };
-
-  const handleMouseLeave1 = () => {
-    setIsHovering1(false);
-  };
 
   useEffect(() => {
     timerIntervalId = setInterval(() => {
@@ -202,60 +216,55 @@ const AssessmentPage = () => {
     setCurrentQuestion(questionIndex);
   };
 
-  const [hoveredEmoji, setHoveredEmoji] = useState(null);
+  const getPaletteStyle = (index) => {
+    const isVisited = !!visited[index];
+    const isAnswered = selectedOptions[index] !== null && selectedOptions[index] !== undefined;
+    const isMarked = !!markedForReview[index];
 
-  const handleHover = (index) => {
-    return () => setHoveredEmoji(meanings[index]);
+    // NTA-style mapping:
+    // - Not visited: Grey
+    // - Visited but not answered: Red
+    // - Answered: Green
+    // - Marked for review (not answered): Yellow
+    // - Marked for review (answered): Yellow + border
+    if (!isVisited) return { bg: 'bg-gray-300', text: 'text-black', ring: '' };
+    if (isMarked && isAnswered) return { bg: 'bg-yellow-300', text: 'text-black', ring: 'ring-2 ring-green-600' };
+    if (isMarked) return { bg: 'bg-yellow-300', text: 'text-black', ring: '' };
+    if (isAnswered) return { bg: 'bg-green-600', text: 'text-white', ring: '' };
+    return { bg: 'bg-red-600', text: 'text-white', ring: '' };
   };
 
-  const handleMouseOut = () => {
-    setHoveredEmoji(null);
+  const jumpToFirst = (predicate) => {
+    const idx = questionsData.findIndex((_, i) => predicate(i));
+    if (idx >= 0) {
+      setShowSubmitConfirm(false);
+      setSubmitConfirmed(false);
+      handleDirectNavigation(idx);
+    }
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100 text-slate-900">
       {loading ? (
         <LoadingAssessment />
       ) : (
         <>
           {/* <UpperNav name={loggedInName} email={loggedInEmail} /> */}
-          <div className="p-4">
-            <div className="navigation-bar mb-4">
-              <div className="mb-2 border border-green-200 rounded-lg shadow-md pt-2 pl-2 relative hover:shadow-lg transition duration-300" style={{ width: '20%', marginLeft: '10px' }}>
-                <div className="mb-4 text-gray-800">Overall Timer: {formatTime(overallTimer)}</div>
-              </div>
-              {questionsData.map((_, index) => (
-                <button
-                  key={index}
-                  className={`nav-button ${index === currentQuestion ? 'active' : ''} ${selectedOptions[index] !== null ? 'answered' : 'unanswered'}`}
-                  onClick={() => handleDirectNavigation(index)}
-                  style={{
-                    backgroundColor: index === currentQuestion ? '#4CAF50' : selectedOptions[index] !== null ? '#2196F3' : '#ddd',
-                    color: index === currentQuestion ? 'white' : selectedOptions[index] !== null ? 'white' : 'black',
-                    border: 'none',
-                    borderRadius: '5px',
-                    padding: '10px 20px',
-                    margin: '5px',
-                    cursor: 'pointer',
-                    minWidth: '50px',
-                    maxWidth: '150px',
-                    transition: 'background-color 0.3s',
-                  }}
-                >
-                  {`Q ${index + 1}`}
-                  {selectedOptions[index] != null ? (
-                    <span style={{ marginLeft: '5px' }}>✔️</span>
-                  ) : (
-                    <span style={{ marginLeft: '5px', color: '#FF5733' }}>❌</span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {questionsData.map((questionObj, questionIndex) => (
-              <div key={questionIndex} className={`bg-gray-200 p-4 rounded shadow ${questionIndex === currentQuestion ? 'block' : 'hidden'}`}>
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-12">
+            {/* Main question area */}
+            <div className="lg:col-span-8">
+              {questionsData.map((questionObj, questionIndex) => (
+                <div key={questionIndex} className={`rounded-lg bg-gray-200 p-4 shadow text-slate-900 ${questionIndex === currentQuestion ? 'block' : 'hidden'}`}>
                 {/* Render question first */}
-                <h2 className="text-2xl font-bold mb-4">Q{questionIndex + 1}: {questionObj.question.split('\n').map((textChunk, index) => (<span key={index}>{textChunk}<br /></span>))}</h2>
+                <h2 className="text-2xl font-bold mb-4 text-black">
+                  Q{questionIndex + 1}:{' '}
+                  {questionObj.question.split('\n').map((textChunk, index) => (
+                    <span key={index}>
+                      {textChunk}
+                      <br />
+                    </span>
+                  ))}
+                </h2>
 
                 {/* Render image below the question */}
                 {questionObj.images?.map((image, imgIndex) => (
@@ -272,7 +281,7 @@ const AssessmentPage = () => {
                         checked={selectedOptions[questionIndex] === optionIndex}
                         className="mr-2"
                       />
-                      <div className={`list-disc ml-4 ${selectedOptions[questionIndex] === optionIndex ? 'text-blue-500 font-bold' : ''}`}>
+                      <div className={`list-disc ml-4 text-black ${selectedOptions[questionIndex] === optionIndex ? 'text-blue-600 font-bold' : ''}`}>
                         {option}
                       </div>
                     </div>
@@ -288,6 +297,12 @@ const AssessmentPage = () => {
                     Previous
                   </button>
                   <button
+                    className={`${markedForReview[currentQuestion] ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-yellow-400 hover:bg-yellow-500'} text-black px-4 py-2 rounded`}
+                    onClick={handleToggleMarkForReview}
+                  >
+                    {markedForReview[currentQuestion] ? 'Unmark Review' : 'Mark for Review'}
+                  </button>
+                  <button
                     className="bg-blue-500 text-white px-4 py-2 rounded"
                     onClick={handleNext}
                     disabled={currentQuestion === questionsData.length - 1}
@@ -301,44 +316,144 @@ const AssessmentPage = () => {
                       Time Spent on this question: {formatTime(timeSpentPerQuestion[questionIndex])}
                     </div>
                   </div>
-                  <div className="border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300" style={{ width: '20%' }} onMouseEnter={handleMouseEnter1} onMouseLeave={handleMouseLeave1}>
-                    <div className="mb-4 text-blue-800">
-                      Rate this?
-                      {isHovering1 && (
-                        <div className="display-flex absolute mb-5">
-                          {emojis.map((emoji, index) => (
-                            <span
-                              key={index}
-                              onMouseOver={handleHover(index)}
-                              onMouseOut={handleMouseOut}
-                              onClick={() => handleFeedbackChange1(questionIndex, emoji)}
-                              className="cursor-pointer text-xl"
-                            >
-                              {emoji}
-                            </span>
-                          ))}
-                          {hoveredEmoji && <div className="tooltip">{hoveredEmoji}</div>}
-                        </div>
-                      )}
-                    </div>
-                    {feedback1[questionIndex] && (
-                      <div className="pt-10 text-lg text-black-700 font-medium">
-                        You selected: {feedback1[questionIndex]}
-                      </div>
-                    )}
+                </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Sidebar palette */}
+            <aside className="lg:col-span-4">
+              <div className="sticky top-4 rounded-lg border border-gray-200 bg-white p-4 shadow">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-semibold text-slate-900">Question Palette</div>
+                  <div className="text-sm text-slate-700">Time: {formatTime(overallTimer)}</div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-6 gap-2">
+                  {questionsData.map((_, index) => {
+                    const st = getPaletteStyle(index);
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleDirectNavigation(index)}
+                        className={`h-9 rounded ${st.bg} ${st.text} ${st.ring} text-sm font-semibold`}
+                        title={`Q${index + 1}`}
+                      >
+                        {index + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-4 space-y-2 text-sm text-slate-800">
+                  <div className="font-semibold text-slate-900">Legend</div>
+                  <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-gray-300" /> Not visited</div>
+                  <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-red-600" /> Visited & not answered</div>
+                  <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-green-600" /> Answered</div>
+                  <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-yellow-300" /> Marked for review</div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-700">
+                    <div>Not visited: <span className="font-semibold">{statusCounts.notVisited}</span></div>
+                    <div>Not answered: <span className="font-semibold">{statusCounts.notAnswered}</span></div>
+                    <div>Answered: <span className="font-semibold">{statusCounts.answered}</span></div>
+                    <div>Marked: <span className="font-semibold">{statusCounts.marked}</span></div>
                   </div>
                 </div>
+
+                <button
+                  onClick={() => setShowSubmitConfirm(true)}
+                  className="mt-4 w-full rounded bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                >
+                  Submit
+                </button>
               </div>
-            ))}
-            <div className="mt-6 flex justify-center">
-              <button
-                onClick={handleSubmit}
-                className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-700 transition duration-300"
-              >
-                Submit
-              </button>
-            </div>
+            </aside>
           </div>
+
+          {/* Submit confirm modal */}
+          {showSubmitConfirm && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+                <div className="text-lg font-semibold text-slate-900">Ready to submit?</div>
+                <div className="mt-2 text-sm text-slate-700">
+                  Please review your attempt summary:
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <button
+                    type="button"
+                    onClick={() => jumpToFirst(() => true)}
+                    className="rounded border border-gray-200 p-3 text-left hover:bg-gray-50"
+                    title="Jump to first question"
+                  >
+                    Total: <span className="font-semibold">{statusCounts.total}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToFirst((i) => (selectedOptions[i] ?? null) !== null)}
+                    className="rounded border border-gray-200 p-3 text-left hover:bg-gray-50"
+                    title="Jump to first answered question"
+                  >
+                    Answered: <span className="font-semibold">{statusCounts.answered}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToFirst((i) => !!visited[i] && (selectedOptions[i] ?? null) === null)}
+                    className="rounded border border-gray-200 p-3 text-left hover:bg-gray-50"
+                    title="Jump to first visited but not answered"
+                  >
+                    Not answered: <span className="font-semibold">{statusCounts.notAnswered}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToFirst((i) => !visited[i])}
+                    className="rounded border border-gray-200 p-3 text-left hover:bg-gray-50"
+                    title="Jump to first not visited"
+                  >
+                    Not visited: <span className="font-semibold">{statusCounts.notVisited}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToFirst((i) => !!markedForReview[i])}
+                    className="rounded border border-gray-200 p-3 text-left hover:bg-gray-50 col-span-2"
+                    title="Jump to first marked for review"
+                  >
+                    Marked for review: <span className="font-semibold">{statusCounts.marked}</span>
+                  </button>
+                </div>
+                <label className="mt-4 flex items-center gap-2 text-sm text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={submitConfirmed}
+                    onChange={(e) => setSubmitConfirmed(e.target.checked)}
+                  />
+                  I have reviewed my attempt summary and want to submit.
+                </label>
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowSubmitConfirm(false)}
+                    className="rounded bg-gray-200 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-gray-300"
+                  >
+                    Not yet
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSubmitConfirm(false);
+                      setSubmitConfirmed(false);
+                      handleSubmit();
+                    }}
+                    disabled={!submitConfirmed}
+                    className={`rounded px-4 py-2 text-sm font-semibold text-white ${
+                      submitConfirmed ? 'bg-green-600 hover:bg-green-700' : 'bg-green-300 cursor-not-allowed'
+                    }`}
+                  >
+                    Yes, submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

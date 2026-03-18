@@ -11,6 +11,7 @@ const AssessmentDone = () => {
     const marksScored = marks[0];
     const totalMarks = marks[1];
     const seconds = marks[2];
+    const answeredCount = selectedOptions?.filter((x) => x !== null && x !== undefined).length ?? 0;
     const percentage1 = (marksScored / totalMarks) * 100;
     const percentage = percentage1.toFixed(2);
     console.log("feedback1",feedback1)
@@ -213,42 +214,42 @@ const AssessmentDone = () => {
             ) : (
                 <>
                     {/* <UpperNav name={loggedInName} email={loggedInEmail} /> */}
-                    <div className="bg-white py-24 sm:py-32">
+                    <div className="bg-gray-100 py-16 sm:py-20">
                         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                            <dl className="grid grid-cols-1 gap-x-8 gap-y-16 text-center lg:grid-cols-4">
-                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                                    <dt className="text-base leading-7 text-gray-600">Total questions</dt>
-                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{totalMarks}</dd>
+                            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow">
+                                <dl className="grid grid-cols-1 gap-x-8 gap-y-10 text-center sm:grid-cols-2 lg:grid-cols-4">
+                                    <div className="mx-auto flex max-w-xs flex-col gap-y-2">
+                                        <dt className="text-sm leading-6 text-gray-600">Total questions</dt>
+                                        <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{totalMarks}</dd>
+                                    </div>
+                                    <div className="mx-auto flex max-w-xs flex-col gap-y-2">
+                                        <dt className="text-sm leading-6 text-gray-600">Answered</dt>
+                                        <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{answeredCount}</dd>
+                                    </div>
+                                    <div className="mx-auto flex max-w-xs flex-col gap-y-2">
+                                        <dt className="text-sm leading-6 text-gray-600">Correct</dt>
+                                        <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{marksScored}</dd>
+                                    </div>
+                                    <div className="mx-auto flex max-w-xs flex-col gap-y-2">
+                                        <dt className="text-sm leading-6 text-gray-600">Time taken</dt>
+                                        <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{seconds}</dd>
+                                    </div>
+                                </dl>
+                                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                                    <button onClick={generatePDF} className="rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                                        Download PDF with answers
+                                    </button>
+                                    <button onClick={() => navigate('/')} className="rounded-md bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">
+                                        Attempt another quiz
+                                    </button>
+                                    <button
+                                        onClick={() => navigate('/review-assessment', { state: { questions, marks, seconds,selectedOptions, timeSpentPerQuestion } })}
+                                        className="rounded-md bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700"
+                                    >
+                                        Review assessment
+                                    </button>
                                 </div>
-                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                                    <dt className="text-base leading-7 text-gray-600">Questions solved correctly</dt>
-                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{marksScored}</dd>
-                                </div>
-                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                                    <dt className="text-base leading-7 text-gray-600">Percentage secured</dt>
-                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{percentage}%</dd>
-                                </div>
-                                <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                                    <dt className="text-base leading-7 text-gray-600">Time taken</dt>
-                                    <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">{seconds}</dd>
-                                </div>
-                            </dl>
-                        </div>
-                        <br />
-                        <div className="mt-10 flex items-center justify-center gap-x-6">
-                            <a onClick={generatePDF} className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                                Download complete PDF with answers
-                            </a>
-                            <button onClick={() => navigate('/')} className="text-sm font-semibold leading-6 text-gray-900">
-                                Attempt another quiz<span aria-hidden="true">→</span>
-                            </button>
-                            <button
-                                onClick={() => navigate('/review-assessment', { state: { questions, marks, seconds,selectedOptions, timeSpentPerQuestion } })}
-                                className="bg-green-500 text-white font-semibold leading-6 px-4 py-2 rounded transition duration-200 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                            >
-                                Review Assessment<span aria-hidden="true">→</span>
-                            </button>
-
+                            </div>
                         </div>
                     </div>
                 </>

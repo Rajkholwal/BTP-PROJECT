@@ -102,61 +102,60 @@ const Firstpage = () => {
                                     <QuizForm loggedInName={loggedInName} loggedInEmail={loggedInEmail} loggedInType={selectedOption} />
                                 </div>
                             ) : (
-                                <div class="bg-white py-24 sm:py-32">
-                                    <div className="option-selector-container">
-                                        <h2><b>Please Select your category</b></h2>
-                                        <div className="options">
-                                            <div
-                                                className={`option ${selectedOption === 'Engineering Student' ? 'selected' : ''}`}
-                                                onClick={() => handleOptionSelect('Engineering Student')}
-                                            >
-                                                <div className="image-container">
-                                                    <img src={engineeringStudentImage} alt="Engineering Student" />
-                                                </div>
-                                                Engineering Student
-                                            </div>
-                                            <div
-                                                className={`option ${selectedOption === 'Non-Engineering Student' ? 'selected' : ''}`}
-                                                onClick={() => handleOptionSelect('Non-Engineering Student')}
-                                            >
-                                                <div className="image-container">
-                                                    <img src={nonEngineeringStudentImage} alt="Non-Engineering Student" />
-                                                </div>
-                                                Non-Engineering Student
-                                            </div>
-                                            <div
-                                                className={`option ${selectedOption === 'Faculty' ? 'selected' : ''}`}
-                                                onClick={() => handleOptionSelect('Faculty')}
-                                            >
-                                                <div className="image-container">
-                                                    <img src={facultyImage} alt="Faculty" />
-                                                </div>
-                                                Faculty
-                                            </div>
-                                            <div
-                                                className={`option ${selectedOption === 'Industry Person' ? 'selected' : ''}`}
-                                                onClick={() => handleOptionSelect('Industry Person')}
-                                            >
-                                                <div className="image-container">
-                                                    <img src={industryPersonImage} alt="Industry Person" />
-                                                </div>
-                                                Industry Person
-                                            </div>
-                                        </div>
-                                        {/* <p>You selected: {selectedOption}</p> */}
-                                        <button
-                                            onClick={handleGo}
-                                            className="mt-4 ml-8 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                                        >
-                                            Go!
-                                        </button>
-                                        <br />
-                                    </div>
+                                <div className="bg-gray-100 py-16 sm:py-20 text-slate-900">
+                                    <div className="mx-auto max-w-6xl px-6 lg:px-8">
+                                        <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow">
+                                        <h2 className="text-center text-2xl font-bold">Please select your role</h2>
+                                        <p className="mt-2 text-center text-slate-600">Choose one to continue</p>
 
-                                    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                                        <div class="mx-auto max-w-2xl lg:text-center">
-                                            <p class="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Attempt Your personalized quiz and assess yourself</p>
-                                            <p class="mt-6 text-lg leading-8 text-gray-600 mb-3">We value your feedback! If you encountered any issues or have suggestions to improve the website, please let us know.</p>
+                                        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOptionSelect('Engineering Student')}
+                                                className={`group rounded-2xl border p-4 text-left shadow-sm transition ${
+                                                    selectedOption === 'Engineering Student'
+                                                        ? 'border-emerald-600 bg-emerald-50'
+                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-50 p-3">
+                                                    <img src={engineeringStudentImage} alt="Engineering Student" className="h-full w-full object-contain" />
+                                                </div>
+                                                <div className="mt-4 text-base font-semibold">Engineering Student</div>
+                                                <div className="mt-1 text-sm text-slate-600">Core DLD / digital logic track</div>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleOptionSelect('Faculty')}
+                                                className={`group rounded-2xl border p-4 text-left shadow-sm transition ${
+                                                    selectedOption === 'Faculty'
+                                                        ? 'border-emerald-600 bg-emerald-50'
+                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                }`}
+                                            >
+                                                <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-gray-50 p-3">
+                                                    <img src={facultyImage} alt="Faculty" className="h-full w-full object-contain" />
+                                                </div>
+                                                <div className="mt-4 text-base font-semibold">Faculty</div>
+                                                <div className="mt-1 text-sm text-slate-600">Create/preview assessments</div>
+                                            </button>
+                                        </div>
+
+                                        <div className="mt-10 flex justify-center">
+                                            <button
+                                                onClick={handleGo}
+                                                className="rounded-md bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+                                            >
+                                                Continue
+                                            </button>
+                                        </div>
+
+                                        <div className="mx-auto mt-14 max-w-2xl text-center">
+                                            <p className="text-3xl font-bold tracking-tight">Attempt your personalized quiz and assess yourself</p>
+                                            <p className="mt-4 text-lg leading-8 text-slate-600 mb-3">
+                                                We value your feedback! If you encountered any issues or have suggestions to improve the website, please let us know.
+                                            </p>
 
                                             {/* <h2 class="text-base font-semibold leading-7 text-indigo-600"><GoogleLogin
                                                 clientId={clientId}
@@ -166,17 +165,17 @@ const Firstpage = () => {
                                                 cookiePolicy={'single_host_origin'}
                                                 isSignedIn={true}
                                             /></h2> */}
-                                            <div className="feedback-btn-container">
+                                            <div className="mt-6 flex justify-center">
                                                 <button
                                                     onClick={() => window.open(feedbackFormLink, '_blank')}
-                                                    className="feedback-btn"
+                                                    className="rounded-md bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
                                                 >
-                                                    Provide Feedback
+                                                    Provide feedback
                                                 </button>
                                             </div>
                                         </div>
+                                        </div>
                                     </div>
-
                                 </div>
 
                             )}

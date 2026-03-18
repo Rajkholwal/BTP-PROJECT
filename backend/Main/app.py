@@ -150,26 +150,11 @@
 #     app.run(debug=True)
 
 
-from flask import Flask, render_template, request, jsonify, send_from_directory, send_file, url_for, redirect
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS, cross_origin
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from main import main
 import os
-
-import io
-from generateAssessment import generateAssessment
-
 from datetime import datetime
 
-
-# MongoDB Connection
-from pymongo import MongoClient
-client = MongoClient('mongodb+srv://kumarchspiyush:nGyCgIRvLThU73ix@cluster0.fdcer.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0') 
-db = client['quizApp']  # Database name
-collection = db['quizResults']  # Collection name
-users_collection = db['users']  # Collection to store user data
-assessments_collection = db['assessments'] 
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -184,7 +169,11 @@ def submit_quiz():
     data = request.json  
     print('Received quiz data for PDF generation:', data)
 
-    ans = main(data['tags'], data['numQuestions'], data['level'])
+    # Import heavy generator modules only when needed so the server can start
+    # without requiring all PDF/diagram dependencies installed.
+    from main import main  # local import by design
+
+    main(data['tags'], data['numQuestions'], data['level'])
     return jsonify({'message': 'Quiz submitted successfully'})
 
 @app.route('/startAssessment', methods=['POST'])
@@ -192,6 +181,8 @@ def submit_quiz():
 def startAssessment():
     data = request.json
     print('Received quiz data to generate assessment:', data)
+
+    from generateAssessment import generateAssessment  # local import by design
 
     questionDetails = generateAssessment(data['tags'], data['numQuestions'], data['level'])
     print(questionDetails)
@@ -236,81 +227,29 @@ def get_pdf_files():
 
 @app.route('/save-assessment', methods=['POST'])
 def save_assessment():
-    data = request.json  # Get JSON data sent from the frontend
-    try:
-        # Insert data into the collection
-        collection.insert_one(data)
-        return jsonify({"status": "success", "message": "Data saved successfully"}), 201
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # Data persistence removed by request. Keep endpoint for compatibility.
+    return jsonify({"status": "success", "message": "Persistence disabled"}), 200
 
 @app.route('/auth/google', methods=['POST'])
 def google_auth():
-    try:
-        data = request.json
-        name = data.get("name")
-        email = data.get("email")
-        googlePhotoUrl = data.get("googlePhotoUrl")
-
-        if not email:
-            return jsonify({"error": "Email is required"}), 400
-
-        # Check if user already exists
-        existing_user = users_collection.find_one({"email": email})
-        if existing_user:
-            users_collection.update_one({"email": email}, {"$set": {"name": name, "googlePhotoUrl": googlePhotoUrl}})
-        else:
-            users_collection.insert_one({"name": name, "email": email, "googlePhotoUrl": googlePhotoUrl})
-
-        return jsonify({"message": "User saved successfully", "user": {"name": name, "email": email, "googlePhotoUrl": googlePhotoUrl}}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500 
+    # No user storage. Simply accept payload and reply OK.
+    data = request.json or {}
+    return jsonify(
+        {
+            "message": "Auth accepted (persistence disabled)",
+            "user": {
+                "name": data.get("name"),
+                "email": data.get("email"),
+                "googlePhotoUrl": data.get("googlePhotoUrl"),
+            },
+        }
+    ), 200
 
 
 @app.route('/submit_user_assessment', methods=['POST'])
 def submit_user_assessment():
-    data = request.json
-    print('Received assessment data:', data)
-
-    email = data.get('email')
-    if not email:
-        return jsonify({"status": "error", "message": "User email is required"}), 400
-
-    assessment_data = data.get("assessments", {})
-
-    formatted_questions = []
-    for i, q in enumerate(assessment_data.get("questionBodies", [])):
-        selected_index = assessment_data["selectedOptions"][i] if i < len(assessment_data["selectedOptions"]) else None
-        selected_option = q["options"][selected_index] if isinstance(selected_index, int) and 0 <= selected_index < len(q["options"]) else "Not answered"
-
-        formatted_questions.append({
-            "question": q["question"],
-            "options": q["options"],
-            "answer": q["options"][assessment_data["correctOptions"].get(str(i), -1)] if str(i) in assessment_data["correctOptions"] else "Unknown",
-            "selectedOption": selected_option,
-            "timeSpent": assessment_data.get("individualTimeTaken", [])[i] if i < len(assessment_data.get("individualTimeTaken", [])) else 0,
-            "images": q.get("images", [])
-        })
-
-    assessment_entry = {
-        "questions": formatted_questions,
-        "submittedAt": datetime.utcnow()
-    }
-
-    print("Processed assessment entry:", assessment_entry)
-
-    try:
-        assessments_collection.update_one(
-            {"email": email},
-            {"$push": {"assessments": assessment_entry}},
-            upsert=True
-        )
-
-        return jsonify({"status": "success", "message": "User assessment saved successfully"}), 201
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # Endpoint kept for frontend compatibility, but does not store anything.
+    return jsonify({"status": "success", "message": "Persistence disabled"}), 200
 
 
 
@@ -318,36 +257,8 @@ def submit_user_assessment():
 
 @app.route('/get_assessments/<email>', methods=['GET'])
 def get_assessments(email):
-    try:
-        user_data = assessments_collection.find_one({"email": email}, {"_id": 0, "assessments": 1})
-
-        if not user_data or "assessments" not in user_data:
-            return jsonify([]), 200  # Return an empty list if no assessments are found
-
-        assessments = []
-        for i, assess in enumerate(user_data["assessments"]):
-            total_questions = len(assess.get("selectedOptions", []))
-            correct_answers = sum(
-                1 for j in range(total_questions)
-                if assess["selectedOptions"][j] == assess["correctOptions"].get(j, -1)  # Fix here
-            ) if total_questions else 0
-
-            assessment_data = {
-                "title": assess.get("title", f"Assessment {i + 1}"),
-                "score": round(100 * correct_answers / total_questions, 2) if total_questions else 0,
-                "date": assess.get("submittedAt").strftime("%Y-%m-%d %H:%M:%S") if isinstance(assess.get("submittedAt"), datetime) else "Unknown",
-                "questions": assess.get("questions", []),
-                "selectedOptions": assess.get("selectedOptions", []),
-                "correctOptions": assess.get("correctOptions", {}),
-                "individualTimeTaken": assess.get("individualTimeTaken", []),
-                "options": assess.get("options", [])  # Ensure this is a **list of lists** if needed
-            }
-            assessments.append(assessment_data)
-
-        return jsonify(assessments), 200
-
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+    # No stored assessments.
+    return jsonify([]), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
