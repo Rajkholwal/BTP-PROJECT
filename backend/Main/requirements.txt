@@ -1,3 +1,17 @@
 Flask==3.0.0
 Flask-Cors==4.0.0
 gunicorn==23.0.0
+
+# Generator/runtime deps (needed on Render for /startAssessment and PDF assets)
+reportlab==4.0.8
+svg2png==1.2
+graphviz==0.20.3
+schemdraw==0.19
+cairocffi==1.7.1
+cairosvg==2.7.1
+cffi==1.17.0
+pycparser==2.22
+pillow==10.2.0
+numpy==1.26.4
+fpdf2==2.7.9
+matplotlib==3.8.4
