@@ -2,22 +2,10 @@ import random
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-import LogicGates.logic_gates
-import Number_System.numerSystemFinal
-import Boolean_Algebra.booleanAlgebraFinal
-import FlipFlops.flipflops
-import StateMachines.fsm
-import SequenceDetector.SequenceDetector
-import LogicGates
-import TruthTable
-import StateMachines
-import StateTable.StateTable
-import StateTable
 import io
 import os
 import svg2png
 
-import TruthTable.generator
 pdf_folder = "./PDF"
 
 # Function to convert SVG to PNG in-memory and return a BytesIO object with adjusted size and quality
@@ -123,18 +111,26 @@ def generate_question(level,tags):
     # print(tags)
     print(random_list)
     if flag == 1:
-        return Number_System.numerSystemFinal.generate_question_number_system(level)
+        from Number_System import numerSystemFinal
+        return numerSystemFinal.generate_question_number_system(level)
     elif flag == 2:
-        return Boolean_Algebra.booleanAlgebraFinal.generate_question_boolean_algebra(level)
+        from Boolean_Algebra import booleanAlgebraFinal
+        return booleanAlgebraFinal.generate_question_boolean_algebra(level)
     elif flag == 3:
-        return LogicGates.logic_gates.generate_question(level)
+        from LogicGates import logic_gates
+        return logic_gates.generate_question(level)
     elif flag == 4:
-        return FlipFlops.flipflops.generate_question_flipflops(level)
+        from FlipFlops import flipflops
+        return flipflops.generate_question_flipflops(level)
     elif flag == 5:
-        return SequenceDetector.SequenceDetector.generate_questions(level)
+        from SequenceDetector import SequenceDetector
+        return SequenceDetector.generate_questions(level)
     elif flag == 6:
-        return TruthTable.generator.generate_question_boolean_algebra()
+        from TruthTable import generator
+        return generator.generate_question_boolean_algebra()
     elif flag == 7:
-        return StateMachines.fsm.genearte_question_FSM(level)
+        from StateMachines import fsm
+        return fsm.genearte_question_FSM(level)
     elif flag == 8:
-        return StateTable.StateTable.generate_question_ST(level)
+        from StateTable import StateTable
+        return StateTable.generate_question_ST(level)
