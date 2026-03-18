@@ -246,13 +246,13 @@ const AssessmentPage = () => {
       ) : (
         <>
           {/* <UpperNav name={loggedInName} email={loggedInEmail} /> */}
-          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-12">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-3 sm:p-4 lg:grid-cols-12">
             {/* Main question area */}
             <div className="lg:col-span-8">
               {questionsData.map((questionObj, questionIndex) => (
                 <div key={questionIndex} className={`rounded-lg bg-gray-200 p-4 shadow text-slate-900 ${questionIndex === currentQuestion ? 'block' : 'hidden'}`}>
                 {/* Render question first */}
-                <h2 className="text-2xl font-bold mb-4 text-black">
+                <h2 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4 text-black">
                   Q{questionIndex + 1}:{' '}
                   {questionObj.question.split('\n').map((textChunk, index) => (
                     <span key={index}>
@@ -277,40 +277,41 @@ const AssessmentPage = () => {
                         checked={selectedOptions[questionIndex] === optionIndex}
                         className="mr-2"
                       />
-                      <div className={`list-disc ml-4 text-black ${selectedOptions[questionIndex] === optionIndex ? 'text-blue-600 font-bold' : ''}`}>
+                      <div className={`ml-2 sm:ml-4 text-sm sm:text-base text-black ${selectedOptions[questionIndex] === optionIndex ? 'text-blue-600 font-bold' : ''}`}>
                         {option}
                       </div>
                     </div>
                   ))}
                 </ul>
 
-                <div className="mb-5 ml-5 mr-5 mt-4 flex justify-between">
+                <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className="w-full sm:w-auto rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                     onClick={handlePrev}
                     disabled={currentQuestion === 0}
                   >
                     Previous
                   </button>
                   <button
-                    className={`${markedForReview[currentQuestion] ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-yellow-400 hover:bg-yellow-500'} text-black px-4 py-2 rounded`}
+                    className={`w-full sm:w-auto rounded px-3 py-2 text-sm font-semibold text-black ${
+                      markedForReview[currentQuestion] ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-yellow-400 hover:bg-yellow-500'
+                    }`}
                     onClick={handleToggleMarkForReview}
                   >
                     {markedForReview[currentQuestion] ? 'Unmark Review' : 'Mark for Review'}
                   </button>
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className="w-full sm:w-auto rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
                     onClick={handleNext}
                     disabled={currentQuestion === questionsData.length - 1}
                   >
                     Next
                   </button>
                 </div>
-                <div className='flex'>
-                  <div className="mr-2 border border-red-200 rounded-lg shadow-md p-4 relative hover:shadow-lg transition duration-300" style={{ width: '20%' }}>
-                    <div className="mb-4 text-black-800 font-bold">
-                      Time Spent on this question: {formatTime(timeSpentPerQuestion[questionIndex])}
-                    </div>
+                <div className="mt-3">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs sm:text-sm text-slate-800 shadow-sm">
+                    <span className="font-semibold">Time on this question:</span>
+                    <span>{formatTime(timeSpentPerQuestion[questionIndex])}</span>
                   </div>
                 </div>
                 </div>
@@ -325,7 +326,7 @@ const AssessmentPage = () => {
                   <div className="text-sm text-slate-700">Time: {formatTime(overallTimer)}</div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-6 gap-2">
+                <div className="mt-3 grid grid-cols-6 sm:grid-cols-8 lg:grid-cols-6 gap-2">
                   {questionsData.map((_, index) => {
                     const st = getPaletteStyle(index);
                     return (
@@ -333,7 +334,7 @@ const AssessmentPage = () => {
                         key={index}
                         type="button"
                         onClick={() => handleDirectNavigation(index)}
-                        className={`h-9 rounded ${st.bg} ${st.text} ${st.ring} text-sm font-semibold`}
+                        className={`h-8 sm:h-9 rounded ${st.bg} ${st.text} ${st.ring} text-xs sm:text-sm font-semibold`}
                         title={`Q${index + 1}`}
                       >
                         {index + 1}
@@ -342,7 +343,7 @@ const AssessmentPage = () => {
                   })}
                 </div>
 
-                <div className="mt-4 space-y-2 text-sm text-slate-800">
+                <div className="mt-4 space-y-2 text-sm text-slate-800 hidden sm:block">
                   <div className="font-semibold text-slate-900">Legend</div>
                   <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-gray-300" /> Not visited</div>
                   <div className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded bg-red-600" /> Visited & not answered</div>
