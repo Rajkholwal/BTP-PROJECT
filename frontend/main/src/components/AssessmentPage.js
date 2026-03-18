@@ -53,7 +53,7 @@ const AssessmentPage = () => {
       }
     };
     fetchQuestionData();
-  }, [numQuestions, selectedLevel, selectedTags, timeSpentPerQuestion]);
+  }, [numQuestions, selectedLevel, selectedTags]);
 
   useEffect(() => {
     const overallTimerInterval = setInterval(() => {

@@ -1,6 +1,7 @@
 import random
 import os
 import itertools
+import re
 import schemdraw
 import schemdraw.logic as logic
 from schemdraw.parsing import logicparse
@@ -61,8 +62,9 @@ def random_expression(variables, num_gates):
 
 def eval_expr(expr, values):
     """Evaluate the expression by substituting the values."""
+    # Replace only whole-variable tokens (avoid corrupting 'and'/'or'/'not')
     for var, val in values.items():
-        expr = expr.replace(var, str(val))
+        expr = re.sub(rf"\b{re.escape(var)}\b", str(val), expr)
     return eval(expr)
 
 ###################### Algo for the equivalent circuit identification #######################
